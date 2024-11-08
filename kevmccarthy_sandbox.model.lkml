@@ -1,3 +1,4 @@
+#
 connection: "sample_bigquery_connection"
 
 include: "/**/order_items.view"

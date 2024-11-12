@@ -1,11 +1,8 @@
-#
-connection: "sample_bigquery_connection"
 
-include: "/**/order_items.view"
+include: "//thelook_ecommerce_autogen_files/basic_model_params"
 
-explore: order_items_basic {
-  from: order_items
-}
+include: "//thelook_ecommerce_autogen_files/basic_explores/events.explore.lkml"
+# explore: +events {}
 
-include: "//thelook_ecommerce_basic_updates/thelook_ecommerce_basic_updates/events.view.lkml"
-explore: events {}
+include: "//thelook_ecommerce_autogen_files/basic_explores/order_items.explore.lkml"
+# explore: +order_items {}

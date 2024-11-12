@@ -1,4 +1,4 @@
-remote_dependency: thelook_ecommerce_basic_updates {
-  url: "https://github.com/kevinMccarthyLooker/thelook_ecommerce_basic_updates.git"
-  ref: "78f6ead78b70c5650a2d5812af6781717640a5e1"
+remote_dependency: thelook_ecommerce_autogen_files {
+  url: "https://github.com/kevinMccarthyLooker/thelook_ecommerce_autogen_files.git"
+  ref: "38073bc3c770f4c7969c1a28c409eebfa0711870"
 }

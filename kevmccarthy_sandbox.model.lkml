@@ -11,7 +11,7 @@ include: "//thelook_ecommerce_autogen_files/basic_explores/order_items.explore.l
 view: a_pdt {
   derived_table: {
     sql: select 1 as id union all select 101 as id;;
-    persist_for: "1 second"
+    persist_for: "24 hours"
   }
   dimension: id {type:number}
 }

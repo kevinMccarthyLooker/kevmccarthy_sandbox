@@ -27,13 +27,13 @@ explore: a_pdt {}
 include: "/**/bq_information_schema_columns.view"
 explore: bq_information_schema_columns {}
 
-
-view: stable_table_name_pdt {
+include: "/stable_table_name_pdt.view.lkml"
+#add persistance here only
+view: +stable_table_name_pdt {
   derived_table: {
-    sql: select 4 as id union all select 101 as id;;
     publish_as_db_view: yes
     datagroup_trigger: datagroup_24_hours
   }
-  dimension: id {type:number}
+
 }
 explore: stable_table_name_pdt {}

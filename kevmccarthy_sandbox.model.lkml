@@ -30,7 +30,7 @@ explore: bq_information_schema_columns {}
 
 view: stable_table_name_pdt {
   derived_table: {
-    sql: select 3 as id union all select 101 as id;;
+    sql: select 4 as id union all select 101 as id;;
     publish_as_db_view: yes
     datagroup_trigger: datagroup_24_hours
   }

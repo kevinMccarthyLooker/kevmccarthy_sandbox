@@ -37,3 +37,8 @@ view: +stable_table_name_pdt {
 
 }
 explore: stable_table_name_pdt {}
+
+include: "/GMack_VZ_Liquid_Filtration_question.view.lkml"
+explore: gmack_vz_liquid_filtration_question {
+
+}

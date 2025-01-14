@@ -8,100 +8,26 @@ view: bq_information_schema_columns__autoLookML {
     drill_fields: [detail*]
   }
 
-  dimension: table_catalog {
-    sql: ${TABLE}.table_catalog ;;
-  }
+  dimension: table_catalog {}
+  dimension: table_schema {}
+  dimension: table_name {}
+  dimension: column_name {}
+  dimension: ordinal_position {}
+  dimension: is_nullable {}
+  dimension: data_type {}
+  dimension: is_generated {}
+  dimension: generation_expression {}
+  dimension: is_stored {}
+  dimension: is_hidden {}
+  dimension: is_updatable {}
+  dimension: is_system_defined {}
+  dimension: is_partitioning_column {}
+  dimension: clustering_ordinal_position {}
+  dimension: collation_name {}
+  dimension: column_default {}
+  dimension: rounding_mode {}
 
-  dimension: table_schema {
-    sql: ${TABLE}.table_schema ;;
-  }
-
-  dimension: table_name {
-    sql: ${TABLE}.table_name ;;
-  }
-
-  dimension: column_name {
-    sql: ${TABLE}.column_name ;;
-  }
-
-  dimension: ordinal_position {
-    sql: ${TABLE}.ordinal_position ;;
-  }
-
-  dimension: is_nullable {
-    sql: ${TABLE}.is_nullable ;;
-  }
-
-  dimension: data_type {
-    sql: ${TABLE}.data_type ;;
-  }
-
-  dimension: is_generated {
-    sql: ${TABLE}.is_generated ;;
-  }
-
-  dimension: generation_expression {
-    sql: ${TABLE}.generation_expression ;;
-  }
-
-  dimension: is_stored {
-    sql: ${TABLE}.is_stored ;;
-  }
-
-  dimension: is_hidden {
-    sql: ${TABLE}.is_hidden ;;
-  }
-
-  dimension: is_updatable {
-    sql: ${TABLE}.is_updatable ;;
-  }
-
-  dimension: is_system_defined {
-    sql: ${TABLE}.is_system_defined ;;
-  }
-
-  dimension: is_partitioning_column {
-    sql: ${TABLE}.is_partitioning_column ;;
-  }
-
-  dimension: clustering_ordinal_position {
-    sql: ${TABLE}.clustering_ordinal_position ;;
-  }
-
-  dimension: collation_name {
-    sql: ${TABLE}.collation_name ;;
-  }
-
-  dimension: column_default {
-    sql: ${TABLE}.column_default ;;
-  }
-
-  dimension: rounding_mode {
-    sql: ${TABLE}.rounding_mode ;;
-  }
-
-  set: detail {
-    fields: [
-        table_catalog,
-  table_schema,
-  table_name,
-  column_name,
-  ordinal_position,
-  is_nullable,
-  data_type,
-  is_generated,
-  generation_expression,
-  is_stored,
-  is_hidden,
-  is_updatable,
-  is_system_defined,
-  is_partitioning_column,
-  clustering_ordinal_position,
-  collation_name,
-  column_default,
-  rounding_mode
-    ]
-  }
+  set: detail { fields: [table_catalog, table_schema, table_name, column_name, ordinal_position, is_nullable, data_type, is_generated, generation_expression, is_stored, is_hidden, is_updatable, is_system_defined, is_partitioning_column, clustering_ordinal_position, collation_name, column_default, rounding_mode] }
 }
 
 view: bq_information_schema_columns {
@@ -177,11 +103,12 @@ view: bq_information_schema_columns {
   }
 
   measure: column_count {
-    type: count
+    # Counts distinct columns across all tables by using the concatenated primary key, excluding NULL values
+    type: count 
     filters: [pk: "-NULL"]
   }
 
-
+  # Set up drill-down path from catalog -> schema -> table -> column
   dimension: table_catalog {drill_fields:[table_schema]}
   dimension: table_schema {drill_fields:[table_name]}
   dimension: table_name {drill_fields:[column_name]}
@@ -189,7 +116,6 @@ view: bq_information_schema_columns {
   dimension: ordinal_position {
     hidden: yes
   }
-
 
 }
 

@@ -42,3 +42,20 @@ include: "/GMack_VZ_Liquid_Filtration_question.view.lkml"
 explore: gmack_vz_liquid_filtration_question {
 
 }
+
+
+include: "/eLyons_label_html_question.lkml"
+
+
+view: order_items_for_Chiaramonte_20250117{
+  extends: [order_items]
+  measure: avg_sale_price {
+    type: average
+    sql: ${sale_price} ;;
+  }
+  measure: total_sale_price {
+    type: sum
+    sql: ${sale_price} ;;
+  }
+}
+explore: order_items_for_Chiaramonte_20250117 {}

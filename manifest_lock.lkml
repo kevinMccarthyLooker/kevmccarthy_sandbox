@@ -4,5 +4,5 @@ remote_dependency: thelook_ecommerce_autogen_files {
 }
 remote_dependency: km_api_explorer_remote_repo {
   url: "https://github.com/kevinMccarthyLooker/km_api_explorer_repo.git"
-  ref: "127b4bf3f0ac807c05883af2a44b0c71b888580d"
+  ref: "34c00bb92cb117b67a53fff369531b475703453b"
 }

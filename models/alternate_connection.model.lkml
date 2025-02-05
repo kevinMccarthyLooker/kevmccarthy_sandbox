@@ -1,6 +1,5 @@
 connection: "default_bigquery_connection"
 
-
 include: "/stable_table_name_pdt.view.lkml"
 view: +stable_table_name_pdt {
   extends: [stable_table_name_pdt]
@@ -10,4 +9,6 @@ view: +stable_table_name_pdt {
   }
   dimension: id {}
 }
-explore: stable_table_name_pdt {}
+explore: stable_table_name_pdt {
+  hidden: yes
+}

@@ -124,3 +124,6 @@ join unnest(
 ) as measure_names_transposed ;;
   }
 }
+
+
+include: "/**/iowa_liquid_stores_sales__main.lkml"

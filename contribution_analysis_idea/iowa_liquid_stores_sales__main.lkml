@@ -313,6 +313,10 @@ view: +insights {
   #   type: number
   #   sql: case when ${total_unexpected_difference}>0 then ${total_expected_difference} else -1*${unexpected_difference_loss} end ;;
   # }
+  measure: total_relative_unexpected_difference {
+    type: sum
+    sql: ${relative_unexpected_difference} ;;
+  }
 }
 
 explore: insights {}

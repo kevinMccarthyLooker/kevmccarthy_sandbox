@@ -8,7 +8,7 @@ explore: order_items {
     type: cross
     relationship: one_to_one
   }
-
+  #consider a sql_always_where to exclude 'future' data that manifests as a result of POP logic
 }
 
 # we will fan out the data to get extra copies, and we'll offset dates for POP.

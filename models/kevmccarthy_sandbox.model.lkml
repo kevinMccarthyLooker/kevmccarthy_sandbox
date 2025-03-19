@@ -5,7 +5,14 @@ include: "//thelook_ecommerce_autogen_files/basic_explores/events.explore.lkml"
 # explore: +events {}
 
 include: "//thelook_ecommerce_autogen_files/basic_explores/order_items.explore.lkml"
-# explore: +order_items {}
+
+view: +products {
+  dimension: brand {
+    label:"tbrandlableadjusted"
+    hidden: yes
+  }
+}
+explore: +order_items {label:"tlabel adjust"}
 
 datagroup: datagroup_24_hours {
   interval_trigger: "24 hours"
@@ -94,7 +101,7 @@ explore: test_row_limit_enforcement {
 include: "/test.dashboard.lookml"
 
 
-#debargis_transpose_question_20250205
+#debargis_transpose_question_20250205:
 view: measure_names_transposed {
   dimension: measure_names_transposed {sql:${TABLE};;}
   measure: transposed_mesuare{
@@ -127,3 +134,56 @@ join unnest(
 
 
 include: "/**/iowa_liquid_stores_sales__main.lkml"
+
+
+##### SHetty question 3/13 https://yaqs.corp.google.com/gbo/q/7523600727592140800?ved=0CAAQ0qAKahcKEwjguI2-jYaMAxUAAAAAHQAAAAAQJw
+view: hide_row_test {
+    derived_table: {
+      sql:
+          SELECT 'Postpaid Phone Gross Adds'  as device_tier, 'Atlantic North'  as Market, 20 as Amount
+UNION ALL SELECT 'Postpaid Phone Gross Adds'  as device_tier, 'Pacific       '  as Market, 30 as Amount
+UNION ALL SELECT 'Postpaid Phone Gross Adds'  as device_tier, 'Headquarters  '  as Market, 10 as Amount
+UNION ALL SELECT 'Tablet Gross Adds        '  as device_tier, 'Atlantic North'  as Market, 30 as Amount
+UNION ALL SELECT 'Tablet Gross Adds        '  as device_tier, 'Pacific       '  as Market, 40 as Amount
+UNION ALL SELECT 'Tablet Gross Adds        '  as device_tier, 'Headquarters  '  as Market, 60 as Amount
+;;
+    }
+
+    dimension: device_tier {
+      type: string
+      sql: ${TABLE}.device_tier ;;
+    }
+
+    dimension: Market {
+      type: string
+      sql: ${TABLE}.Market ;;
+    }
+
+    measure: Sales_Amount {
+      type: sum
+      sql: ${TABLE}.Amount ;;
+    }
+
+  }
+explore: hide_row_test {}
+
+###
+# This was a test 3/17/25 based on Tomoya Mizuno's  question
+# learned that this simple override of access_filter does not allow developer to go around it - ths new access filter on the same field just gets added as additional criteria.
+
+# explore: order_items_with_access_filter {
+#   from: order_items
+#   view_name: order_items
+#   access_filter: {
+#     field: order_items.user_id
+#     user_attribute: id
+#   }
+# }
+
+
+# explore: +order_items_with_access_filter {
+#   access_filter: {
+#     field: order_items.user_id
+#     user_attribute: test__id_for_access_filter
+#   }
+# }

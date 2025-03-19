@@ -30,9 +30,25 @@ view: pop_support {
   dimension_group: pop_date {
     type: time
     timeframes: [date,month,year]
-    sql: date_add(date(${order_items.created_at_raw}), interval ${periods_ago} year) ;;
+    sql: timestamp(date_add(date(${order_items.created_at_raw}), interval ${periods_ago} {% parameter period_size %}))
+
+    ;;
+  }
+
+  parameter: period_size {
+    type: unquoted
+    allowed_value: {value:"year" label:"year"}
+    allowed_value: {value:"month" label:"month"}
+    allowed_value: {value:"quarter" label:"quarter"}
+  }
+
+  measure: max_created {
+    type: date
+    sql: max(${order_items.created_at_raw}) ;;
   }
 }
+
+
 
 # #3/6
 # include: "//thelook_ecommerce_autogen_files/basic_updates_to_views/users.view.lkml"
@@ -40,3 +56,5 @@ view: pop_support {
 #   #problematic approach: join in the existing simple pop_support, which was built upon order_items date field (order items not needed in this explore)
 #   #join:pop_support
 # }
+
+include: "/models/pop_simple_single_table.lkml"

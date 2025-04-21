@@ -1,3 +1,4 @@
+#autogen iowa_liquior_sales
 view: iowa_liquor_sales_sales {
   derived_table: {
     sql: select * from `bigquery-public-data.iowa_liquor_sales.sales`;;
@@ -72,36 +73,10 @@ view: iowa_liquor_sales_sales {
   dimension: volume_sold_gallons {
     type: number
   }
-
-  set: detail {
-    fields: [
-      invoice_and_item_number,
-      date,
-      store_number,
-      store_name,
-      address,
-      city,
-      zip_code,
-      store_location,
-      county_number,
-      county,
-      category,
-      category_name,
-      vendor_number,
-      vendor_name,
-      item_number,
-      item_description,
-      pack,
-      bottle_volume_ml,
-      state_bottle_cost,
-      state_bottle_retail,
-      bottles_sold,
-      sale_dollars,
-      volume_sold_liters,
-      volume_sold_gallons
-    ]
-  }
+  #autogen detail set
+  set: detail {fields: [invoice_and_item_number,date,store_number,store_name,address,city,zip_code,store_location,county_number,county,category,category_name,vendor_number,vendor_name,item_number,item_description,pack,bottle_volume_ml,state_bottle_cost,state_bottle_retail,bottles_sold,sale_dollars,volume_sold_liters,volume_sold_gallons]}
 }
+
 
 view: +iowa_liquor_sales_sales {
   dimension_group: sale_date {
@@ -109,11 +84,185 @@ view: +iowa_liquor_sales_sales {
     datatype: date
     sql: ${date} ;;
   }
+  #test combinations
+  measure: count_pack_month_and_vendor_combos {
+    type: number
+    sql: count(distinct concat(${pack},${sale_date_month},${vendor_name})) ;;
+  }
+
+  measure: total_sales {type: sum sql: ${sale_dollars} ;; drill_fields:[bottle_volume_ml,bottles_sold,category_name,pack,sale_date_month,total_sales]
+  #override the drill link to send initiate writing results to a specific location
+    html:
+    {% assign model_and_explore = _model['_name'] | append:'/' | append: _explore['_name'] %}
+    {% assign updated_link = link | replace: model_and_explore, 'test_procedural_bq_syntax/test_procedural_bq_syntax' %}
+    {% assign dont_select_target_field = updated_link | replace: 'iowa_liquor_sales_sales.category_name,',''%}
+    {% assign test_field_filter_removed = dont_select_target_field | replace: 'CANADIAN+WHISKIES',''%}
+    {% assign set_test_field = test_field_filter_removed | append: '&dynamic_fields=[{"category":"dimension","expression":"${iowa_liquor_sales_sales.category_name}=\"CANADIAN+WHISKIES\"","label":"is_test","value_format":null,"value_format_name":null,"dimension":"is_test","_kind_hint":"dimension","_type_hint":"yesno"}]' %}
+    {% assign add_is_test_field_to_selected_fields = set_test_field | replace: '?fields=', '?fields=is_test,' %}
+    {% assign add_filter_on_measure = add_is_test_field_to_selected_fields | replace: 'query_timezone', '&f[iowa_liquor_sales_sales.total_sales]=>0&query_timezone' %}
+
+    {% assign compiled_message = '&f[script_start.test_entry]= drilled on catgegory' | append: '&query_timezone'  %}
+    {% assign pass_custom_message_to_target_table_build = add_filter_on_measure | replace: 'query_timezone', compiled_message%}
+    <a href="https://looker.thekitchentable.gccbianortham.joonix.net{{pass_custom_message_to_target_table_build}}">write drilldown to table </a>
+    ;;
+    }
+# {% assign compiled_message = '&f[script_start.test_entry]=different message with spaces. final build url:' | append: add_filter_on_measure | append: '&query_timezone' | filterable_value %}
 }
 
-
-
 explore: iowa_liquor_sales_sales {}
+
+### Inoput View {
+# Define a table as base of contribution analysis
+# set dimensions as appropriate for this case
+
+view: input_view {
+  derived_table: {
+    explore_source: iowa_liquor_sales_sales {
+      column: dimension_1 {field:iowa_liquor_sales_sales.category_name}#add your own fields
+      column: dimension_2 {field:iowa_liquor_sales_sales.pack}
+
+      column: test_dim {field:iowa_liquor_sales_sales.county}
+
+      column: measure {field:iowa_liquor_sales_sales.total_sales}
+
+      derived_column: is_test {sql:case when test_dim = 'ADAIR' then TRUE else FALSE END;;}
+    }
+  }
+  dimension: dimension_1 {}
+  dimension: dimension_2 {}
+  dimension: is_test {}
+  dimension: measure_as_a_dimension {sql:${TABLE}.measure;;}
+  measure: total_measure {type:sum sql:${measure_as_a_dimension};;}
+}
+#expose an explore on input view for testing/and troubleshooting
+explore: input_view {}
+
+#build a model and then use it to generate insights table (i.e. the result of contribution analysis)
+view: insights_table_test {
+  extends: [insights] #insghts template has the lookml modelled output fields.
+  parameter: test_param {
+
+  }
+  dimension: project_id_bq_variable {}
+  dimension: session_variable {}
+  derived_table: {
+
+
+#? Can and should we do no persistance?
+#1) with longer persistance, does it really not re-run create model? Seems so
+#2) what if create_process sql changes (e.g. based on parameter) - Causes it to re-run, which seems perfect (only rehuilds if results will be different)
+    persist_for: "24 hour" #looker throws validation error if no persistance is set.
+    # persist_for: "-1 hour"
+    # persist_for: "1 second"
+
+#can we set bq variables and other procedural syntax using create_process?
+    # create_process: {
+    #   sql_step:
+
+    #   DECLARE x INT64;
+    #   SET x = 5;
+    #   ;;
+    #   ## STEP 1: create or replace the training data table
+    #   sql_step:
+
+    #   --test if params can be exposed in create process?
+    #   --test_param: {{test_param._parameter_value}} - {% parameter test_param %}
+    #   --user_attribute: {{_user_attributes['email']}}
+    #   --project_id:
+    #   --following contribution analysis blog https://cloud.google.com/blog/products/data-analytics/introducing-a-new-contribution-analysis-model-in-bigquery
+    #   CREATE OR REPLACE TABLE thekitchentable.iowaliquor.contribution_analysis_insights_table_test AS
+    #   (SELECT
+    #     dimension_1,
+    #     dimension_2,
+    #     is_test,
+    #     SUM(measure) total_measure,
+    #   --FROM `bigquery-public-data.iowa_liquor_sales.sales`
+    #   FROM ${input_view.SQL_TABLE_NAME} as input_view
+    #   --WHERE 1=1 and sale_dollars>0 --resolve error For Contribution Analysis models with a min_apriori_support value greater than 0, all 'total_sales' values must be non-negative.
+    #   GROUP BY all
+    #   having SUM(measure)>x
+    #   );
+    #   ;;
+
+    #   sql_step:
+    #   CREATE OR REPLACE MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model_test
+    #     OPTIONS(
+    #       model_type = 'CONTRIBUTION_ANALYSIS',
+    #       contribution_metric =
+    #         'sum(total_measure)',
+    #       dimension_id_cols = ['dimension_1', 'dimension_2'],
+    #       is_test_col = 'is_test',
+    #       min_apriori_support = 0.001
+    #   ) AS
+    #   SELECT * FROM thekitchentable.iowaliquor.contribution_analysis_insights_table_test
+
+
+    #   ;;
+
+    #   sql_step:
+    #   CREATE OR REPLACE TABLE ${SQL_TABLE_NAME} AS
+    #   (SELECT
+    #     *
+    #     ,@@project_id as project_id_bq_variable
+    #   -- ,x as session_variable
+    #   FROM ML.GET_INSIGHTS(
+    #     MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model_test)
+    #   ORDER BY unexpected_difference DESC)
+    #   ;
+
+    #         ;;
+    # }
+    create_process: {
+      sql_step:
+
+      DECLARE x INT64;
+      SET x = 5;
+
+      --STEP 1: create or replace the training data table
+      --test if params can be exposed in create process?
+      --test_param: {{test_param._parameter_value}} - {% parameter test_param %}
+      --user_attribute: {{_user_attributes['email']}}
+      --project_id:
+      --following contribution analysis blog https://cloud.google.com/blog/products/data-analytics/introducing-a-new-contribution-analysis-model-in-bigquery
+      CREATE OR REPLACE TABLE thekitchentable.iowaliquor.contribution_analysis_insights_table_test AS
+      (SELECT
+        dimension_1,
+        dimension_2,
+        is_test,
+        SUM(measure) total_measure,
+      --FROM `bigquery-public-data.iowa_liquor_sales.sales`
+      FROM ${input_view.SQL_TABLE_NAME} as input_view
+      --WHERE 1=1 and sale_dollars>0 --resolve error For Contribution Analysis models with a min_apriori_support value greater than 0, all 'total_sales' values must be non-negative.
+      GROUP BY all
+      having SUM(measure)>0
+      );
+
+      CREATE OR REPLACE MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model_test
+        OPTIONS(
+          model_type = 'CONTRIBUTION_ANALYSIS',
+          contribution_metric =
+            'sum(total_measure)',
+          dimension_id_cols = ['dimension_1', 'dimension_2'],
+          is_test_col = 'is_test',
+          min_apriori_support = 0.001
+      ) AS
+      SELECT * FROM thekitchentable.iowaliquor.contribution_analysis_insights_table_test
+    ;
+      CREATE OR REPLACE TABLE ${SQL_TABLE_NAME} AS
+      (SELECT
+        *
+        ,@@project_id as project_id_bq_variable
+       ,x as session_variable
+      FROM ML.GET_INSIGHTS(
+        MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model_test)
+      ORDER BY unexpected_difference DESC)
+      ;
+            ;;
+    }
+  }
+
+}
+  explore: insights_table_test {}
 
 view: insights_table {
   derived_table: {

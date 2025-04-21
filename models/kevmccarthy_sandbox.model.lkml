@@ -133,7 +133,7 @@ join unnest(
 }
 
 
-include: "/**/iowa_liquid_stores_sales__main.lkml"
+include: "/**/iowa_liquor_stores_sales__main.lkml"
 
 
 ##### SHetty question 3/13 https://yaqs.corp.google.com/gbo/q/7523600727592140800?ved=0CAAQ0qAKahcKEwjguI2-jYaMAxUAAAAAHQAAAAAQJw
@@ -187,3 +187,77 @@ explore: hide_row_test {}
 #     user_attribute: test__id_for_access_filter
 #   }
 # }
+
+# Was trying to determin explore url from info in ROW (+ drill). Made progress towards checking every field's.. if there's also a filter on that field in explore settings, but realized measure filters are not captured in either drill down link or row.
+view: order_items_drill_experiments {
+  extends: [order_items]
+  measure: row_results_in_html_measure {
+    sql: max('placeholder') ;;
+    html:
+    {% assign result_columns_array = row | remove: '{' | remove: '}' |  split:', ' %}
+    {% for column in result_columns_array %}
+      {{column}}<br>
+    {% endfor %}
+    ;;
+  }
+  measure: drill {
+    type: count
+    drill_fields: [order_items.*]
+  }
+  measure: drill_link_text {
+    type: count
+    #&f[products.category]=Accessories&f[products.department]=Men&f[products.name]=B%25&query_timezone
+    html:
+    drill link: {{drill._link}}<br>
+--list of filters based on drills<br>
+    {% assign drill_field_filter_fields = drill._link | split: '&amp;query_timezone' | first | split: '&amp;f'  %}
+{% comment %} remove first element{% endcomment %}
+    {% assign filter_fields_array_num_elements = drill_field_filter_fields | size | minus: 1 %}
+    {% for i in (1..filter_fields_array_num_elements) %}
+      {{drill_field_filter_fields[i]}}<br>
+    {%endfor%}
+    --
+    <br>
+
+    {% assign field_array_string = 'products.name;products.category'%}
+    {% assign field_array = field_array_string | split: ';'%}
+    {% for field in field_array %}
+      {{field}}:{{_filters[field]}}<br>
+    {% endfor %}
+    ;;
+    # {% assign field_to_check = 'products.name' %}
+    # filters:{{_filters[field_to_check]}}
+  }
+}
+explore: order_items_drill_experiments {extends:[order_items]
+  from:order_items_drill_experiments
+  view_name: order_items
+}
+
+include: "/contribution_analysis_idea/modelling_generic_results.lkml"
+
+# view: chained_ndt_reuse_20250421 {
+#   derived_table: {sql: select 1 as id;;}
+#   dimension: id {}
+# }
+# explore: chained_ndt_reuse_20250421 {}
+
+# view: chained_ndt_reuse_20250421_2 {
+#   derived_table: {
+#     explore_source: chained_ndt_reuse_20250421 {
+#       column: id2 {field:chained_ndt_reuse_20250421.id}
+#     }
+#   }
+#   dimension: id2 {}
+# }
+
+# view: chained_ndt_reuse_20250421_3 {
+#   derived_table: {
+#     sql:
+#     select id, id2 from {{chained_ndt_reuse_20250421_2._view._name}} left join ${chained_ndt_reuse_20250421.SQL_TABLE_NAME} chained_ndt_reuse_20250421 on ${chained_ndt_reuse_20250421.id}=${chained_ndt_reuse_20250421_2.id}
+#     ;;
+#   }
+#   dimension: id {}
+#   dimension: id2 {}
+# }
+# explore: chained_ndt_reuse_20250421_3 {}

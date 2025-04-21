@@ -6,7 +6,7 @@ view: incremental_pdt_with_max_age_20250421 {
     increment_offset: 3
     sql_trigger_value: select current_timestamp() ;;
   }
-  dimension: a_day {}
+  dimension: a_day {type:date}
 
 }
 

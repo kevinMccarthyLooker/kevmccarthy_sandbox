@@ -38,13 +38,14 @@ view: pop_support {
   parameter: period_size {
     type: unquoted
     allowed_value: {value:"year" label:"year"}
+    allowed_value: {value:"week" label:"week"}
     allowed_value: {value:"month" label:"month"}
     allowed_value: {value:"quarter" label:"quarter"}
   }
 
   measure: max_created {
     type: date
-    sql: max(${order_items.created_at_raw}) ;;
+    sql: max(timestamp_trunc(${order_items.created_at_raw}, {% if pop_support.pop_date_month._is_selected %}MONTH{% elsif pop_support.pop_date_year._is_selected %}YEAR{% else %}DAY{% endif %})) ;;
   }
 }
 

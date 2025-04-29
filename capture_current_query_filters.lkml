@@ -1,35 +1,7 @@
-connection: "sample_bigquery_connection"
-include: "//thelook_ecommerce_autogen_files/auto_gen_views/order_items.view.lkml"
-
-view: +order_items {
-
-  measure: drill {
-    type: count
-    drill_fields: [id,created_at_date]
-  }
-  measure: special_drill {
-    type: count
-    html:
-    {% assign encoded_row_info = row  | replace: '"', '' %}
-    {% assign quoted_encoded_row_info = '%22' | append: encoded_row_info  | append: '%22' %}
-    {% assign value_to_inject = 'f[order_items.catch_url_data]=' | append: quoted_encoded_row_info | append: '&query_timezone' %}
-    <a href="{{drill._link | replace: 'query_timezone', value_to_inject}}">special test link </a> ;;
-  }
-
-
-
-  parameter: catch_url_data {
-    type: string
-  }
-}
-explore: order_items {}
-
-# '&f[order_items.catch_url_data]=wfew+wef%5E+%5E+&query_timezone'
-
-view: capture_filter_settings__order_items_explore {
+view: capture_filter_settings__template {
   derived_table: {
     sql:
-    select
+select
 {% assign pasted_all_fields =
 '
 "order_items.count",
@@ -122,19 +94,18 @@ view: capture_filter_settings__order_items_explore {
 '
 %}
 
-{% assign stripped_all_fields = pasted_all_fields | strip_newlines  %}
-{% assign all_fields_results = stripped_all_fields |replace: '"','' | split:','%}
-'{% for field in all_fields_results %}{{field}}:{{ _filters[field] | sql_quote | replace: "'","\'" |append: ';' }}{%endfor%}' as all_fields_with_filters_string
-;;#
+      {% assign stripped_all_fields = pasted_all_fields | strip_newlines  %}
+      {% assign all_fields_results = stripped_all_fields |replace: '"','' | split:','%}
+      '{% for field in all_fields_results %}{{field}}:{{ _filters[field] | sql_quote | replace: "'","\'" |append: ';' }}{%endfor%}' as all_fields_with_filters_string
+      ;;#
   }
-  dimension: all_fields_with_filters_string {
-  }
+  dimension: all_fields_with_filters_string {}
 }
 
-explore: +order_items {
-  join: capture_filter_settings__order_items_explore {
-    # sql:;;
+explore: capture_filter_settings__template_explore_for_extension  {
+  extension: required
+  join: capture_filter_settings__template {
+    relationship: many_to_one
     type: cross
-    relationship:one_to_one
   }
 }

@@ -1,7 +1,7 @@
 
 include: "//thelook_ecommerce_autogen_files/basic_model_params"
 
-include: "//thelook_ecommerce_autogen_files/basic_explores/events.explore.lkml"
+# include: "//thelook_ecommerce_autogen_files/basic_explores/events.explore.lkml"
 # explore: +events {}
 
 include: "//thelook_ecommerce_autogen_files/basic_explores/order_items.explore.lkml"
@@ -12,7 +12,7 @@ view: +products {
     hidden: yes
   }
 }
-explore: +order_items {label:"tlabel adjust"}
+# explore: +order_items {label:"tlabel adjust"}
 
 datagroup: datagroup_24_hours {
   interval_trigger: "24 hours"
@@ -261,3 +261,29 @@ include: "/contribution_analysis_idea/modelling_generic_results.lkml"
 #   dimension: id2 {}
 # }
 # explore: chained_ndt_reuse_20250421_3 {}
+
+
+# include: "/capture_current_query_filters.lkml"
+# view: test_capture_filters_base {
+#   extends: [order_items]
+
+# }
+# view: capture_filter_settings__for_test_capture_explore {
+#   extends:[capture_filter_settings__template]
+#   derived_table: {
+#     sql:
+#     {% assign x = '1' %}
+#     ${EXTENDED} ;;
+#   }
+#   }
+# explore: test_capture_filters_base {
+#   # extends: [capture_filter_settings__template_explore_for_extension]
+#   join: capture_filter_settings__for_test_capture_explore {relationship: many_to_one type: cross}
+# }
+include: "/events_explore_with_capture_filters.lkml"
+explore: +events {
+  join: capture_filter_settings__events {
+    relationship: many_to_one
+    type: cross
+  }
+}

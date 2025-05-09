@@ -1,17 +1,17 @@
 connection: "kevmccarthy_bq"
 # connection: "test_postgresql"
-view: incremental_pdt_with_max_age_20250421 {
-  derived_table: {
-    sql: select * from unnest(GENERATE_DATE_ARRAY('2016-10-05', '2025-12-31')) a_day where a_day>date_add(current_date(),interval -1000 day);;
-    # increment_key: "timestamp(a_day)"
-    # increment_offset: 3
-    # sql_trigger_value: select current_timestamp() ;;
-  }
-  dimension: a_day {type:date datatype:date}
+# view: incremental_pdt_with_max_age_20250421 {
+#   derived_table: {
+#     sql: select * from unnest(GENERATE_DATE_ARRAY('2016-10-05', '2025-12-31')) a_day where a_day>date_add(current_date(),interval -1000 day);;
+#     # increment_key: "timestamp(a_day)"
+#     # increment_offset: 3
+#     # sql_trigger_value: select current_timestamp() ;;
+#   }
+#   dimension: a_day {type:date datatype:date}
 
-}
+# }
 
-explore: incremental_pdt_with_max_age_20250421  {}
+# explore: incremental_pdt_with_max_age_20250421  {}
 
 
 view: is_drill_filter_logic_passed_through_20250423 {
@@ -224,3 +224,28 @@ view: date_test {
 }
 
 explore: date_test {}
+
+view: pop_test {
+  derived_table: {sql:select * from unnest(GENERATE_DATE_ARRAY('2016-10-05', '2025-12-31')) a_date;;}
+  dimension_group: date_for_pop {
+    type: time timeframes: [date,month]
+    datatype: date
+    sql: ${TABLE}.a_date ;;
+
+  }
+  measure: count {type:count}
+  # measure: pop {
+  #   type: period_over_period
+  #   based_on: count
+  #   based_on_time: date_for_pop_date
+  #   period: month
+  #   kind: previous
+  # }
+}
+explore: pop_test_explore {
+  from: pop_test
+  # view_name: pop_test
+}
+
+
+include: "/**/create_process_for_custom_incremental_PDT_test.lkml"

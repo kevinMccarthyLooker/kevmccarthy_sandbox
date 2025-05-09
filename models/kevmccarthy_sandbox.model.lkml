@@ -287,3 +287,7 @@ explore: +events {
     type: cross
   }
 }
+
+
+include:"/**/ismail_tigrek_formatting_20250429.lkml"
+explore: ismail_tigrek_formatting_20250429_order_items {}

@@ -36,3 +36,24 @@ remote_dependency: km_api_explorer_remote_repo {
 #   }
 # }
 # https://looker.thekitchentable.gccbianortham.joonix.net/projects/kevmccarthy_sandbox/files/imported_projects/km_api_explorer_remote_repo/bundle.js
+
+application: simple_extension_km {
+  label: "Simple Extension km"
+  url: "https://localhost:8080/bundle.js"
+  # file: "bundle.js"
+  entitlements: {
+    core_api_methods: ["me", "run_inline_query"]
+    navigation: yes
+    use_embeds: yes
+    use_iframes: yes
+    new_window: yes
+    new_window_external_urls: []
+    local_storage: yes
+    external_api_urls: []
+  }
+  mount_points: {
+    dashboard_vis: no
+    dashboard_tile: yes
+    standalone: yes
+  }
+}

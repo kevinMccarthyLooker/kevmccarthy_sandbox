@@ -291,3 +291,255 @@ explore: +events {
 
 include:"/**/ismail_tigrek_formatting_20250429.lkml"
 explore: ismail_tigrek_formatting_20250429_order_items {}
+
+
+include: "/pop_extends_update_test_20250512.lkml"
+explore: events_with_pop_base {}
+explore: events_with_pop_extension__current {}
+
+
+view: +order_items {
+  dimension: test_2025 {}
+
+}
+
+
+
+
+explore: +order_items {
+  join: order_items_field_list {sql:;; relationship:one_to_one}
+}
+
+view: order_items_field_list {
+  dimension: all_fields_pasted {
+    sql:
+{% if order_items.view_label._is_selected %} order_items.view_label{% else %} -- order_items.view_label is not selected {% endif %}
+{% if order_items.primary_key._is_selected %} order_items.primary_key{% else %} -- order_items.primary_key is not selected {% endif %}
+{% if order_items.count._is_selected %} order_items.count{% else %} -- order_items.count is not selected {% endif %}
+{% if order_items.id._is_selected %} order_items.id{% else %} -- order_items.id is not selected {% endif %}
+{% if order_items.order_id._is_selected %} order_items.order_id{% else %} -- order_items.order_id is not selected {% endif %}
+{% if order_items.user_id._is_selected %} order_items.user_id{% else %} -- order_items.user_id is not selected {% endif %}
+{% if order_items.product_id._is_selected %} order_items.product_id{% else %} -- order_items.product_id is not selected {% endif %}
+{% if order_items.inventory_item_id._is_selected %} order_items.inventory_item_id{% else %} -- order_items.inventory_item_id is not selected {% endif %}
+{% if order_items.status._is_selected %} order_items.status{% else %} -- order_items.status is not selected {% endif %}
+{% if order_items.created_at_date._is_selected %} order_items.created_at_date{% else %} -- order_items.created_at_date is not selected {% endif %}
+{% if order_items.created_at_day_of_month._is_selected %} order_items.created_at_day_of_month{% else %} -- order_items.created_at_day_of_month is not selected {% endif %}
+{% if order_items.created_at_day_of_week._is_selected %} order_items.created_at_day_of_week{% else %} -- order_items.created_at_day_of_week is not selected {% endif %}
+{% if order_items.created_at_day_of_week_index._is_selected %} order_items.created_at_day_of_week_index{% else %} -- order_items.created_at_day_of_week_index is not selected {% endif %}
+{% if order_items.created_at_day_of_year._is_selected %} order_items.created_at_day_of_year{% else %} -- order_items.created_at_day_of_year is not selected {% endif %}
+{% if order_items.created_at_hour._is_selected %} order_items.created_at_hour{% else %} -- order_items.created_at_hour is not selected {% endif %}
+{% if order_items.created_at_hour_of_day._is_selected %} order_items.created_at_hour_of_day{% else %} -- order_items.created_at_hour_of_day is not selected {% endif %}
+{% if order_items.created_at_minute._is_selected %} order_items.created_at_minute{% else %} -- order_items.created_at_minute is not selected {% endif %}
+{% if order_items.created_at_month._is_selected %} order_items.created_at_month{% else %} -- order_items.created_at_month is not selected {% endif %}
+{% if order_items.created_at_month_num._is_selected %} order_items.created_at_month_num{% else %} -- order_items.created_at_month_num is not selected {% endif %}
+{% if order_items.created_at_month_name._is_selected %} order_items.created_at_month_name{% else %} -- order_items.created_at_month_name is not selected {% endif %}
+{% if order_items.created_at_quarter._is_selected %} order_items.created_at_quarter{% else %} -- order_items.created_at_quarter is not selected {% endif %}
+{% if order_items.created_at_quarter_of_year._is_selected %} order_items.created_at_quarter_of_year{% else %} -- order_items.created_at_quarter_of_year is not selected {% endif %}
+{% if order_items.created_at_raw._is_selected %} order_items.created_at_raw{% else %} -- order_items.created_at_raw is not selected {% endif %}
+{% if order_items.created_at_time._is_selected %} order_items.created_at_time{% else %} -- order_items.created_at_time is not selected {% endif %}
+{% if order_items.created_at_time_of_day._is_selected %} order_items.created_at_time_of_day{% else %} -- order_items.created_at_time_of_day is not selected {% endif %}
+{% if order_items.created_at_week._is_selected %} order_items.created_at_week{% else %} -- order_items.created_at_week is not selected {% endif %}
+{% if order_items.created_at_week_of_year._is_selected %} order_items.created_at_week_of_year{% else %} -- order_items.created_at_week_of_year is not selected {% endif %}
+{% if order_items.created_at_year._is_selected %} order_items.created_at_year{% else %} -- order_items.created_at_year is not selected {% endif %}
+{% if order_items.shipped_at_date._is_selected %} order_items.shipped_at_date{% else %} -- order_items.shipped_at_date is not selected {% endif %}
+{% if order_items.shipped_at_day_of_month._is_selected %} order_items.shipped_at_day_of_month{% else %} -- order_items.shipped_at_day_of_month is not selected {% endif %}
+{% if order_items.shipped_at_day_of_week._is_selected %} order_items.shipped_at_day_of_week{% else %} -- order_items.shipped_at_day_of_week is not selected {% endif %}
+{% if order_items.shipped_at_day_of_week_index._is_selected %} order_items.shipped_at_day_of_week_index{% else %} -- order_items.shipped_at_day_of_week_index is not selected {% endif %}
+{% if order_items.shipped_at_day_of_year._is_selected %} order_items.shipped_at_day_of_year{% else %} -- order_items.shipped_at_day_of_year is not selected {% endif %}
+{% if order_items.shipped_at_hour._is_selected %} order_items.shipped_at_hour{% else %} -- order_items.shipped_at_hour is not selected {% endif %}
+{% if order_items.shipped_at_hour_of_day._is_selected %} order_items.shipped_at_hour_of_day{% else %} -- order_items.shipped_at_hour_of_day is not selected {% endif %}
+{% if order_items.shipped_at_minute._is_selected %} order_items.shipped_at_minute{% else %} -- order_items.shipped_at_minute is not selected {% endif %}
+{% if order_items.shipped_at_month._is_selected %} order_items.shipped_at_month{% else %} -- order_items.shipped_at_month is not selected {% endif %}
+{% if order_items.shipped_at_month_num._is_selected %} order_items.shipped_at_month_num{% else %} -- order_items.shipped_at_month_num is not selected {% endif %}
+{% if order_items.shipped_at_month_name._is_selected %} order_items.shipped_at_month_name{% else %} -- order_items.shipped_at_month_name is not selected {% endif %}
+{% if order_items.shipped_at_quarter._is_selected %} order_items.shipped_at_quarter{% else %} -- order_items.shipped_at_quarter is not selected {% endif %}
+{% if order_items.shipped_at_quarter_of_year._is_selected %} order_items.shipped_at_quarter_of_year{% else %} -- order_items.shipped_at_quarter_of_year is not selected {% endif %}
+{% if order_items.shipped_at_raw._is_selected %} order_items.shipped_at_raw{% else %} -- order_items.shipped_at_raw is not selected {% endif %}
+{% if order_items.shipped_at_time._is_selected %} order_items.shipped_at_time{% else %} -- order_items.shipped_at_time is not selected {% endif %}
+{% if order_items.shipped_at_time_of_day._is_selected %} order_items.shipped_at_time_of_day{% else %} -- order_items.shipped_at_time_of_day is not selected {% endif %}
+{% if order_items.shipped_at_week._is_selected %} order_items.shipped_at_week{% else %} -- order_items.shipped_at_week is not selected {% endif %}
+{% if order_items.shipped_at_week_of_year._is_selected %} order_items.shipped_at_week_of_year{% else %} -- order_items.shipped_at_week_of_year is not selected {% endif %}
+{% if order_items.shipped_at_year._is_selected %} order_items.shipped_at_year{% else %} -- order_items.shipped_at_year is not selected {% endif %}
+{% if order_items.delivered_at_date._is_selected %} order_items.delivered_at_date{% else %} -- order_items.delivered_at_date is not selected {% endif %}
+{% if order_items.delivered_at_day_of_month._is_selected %} order_items.delivered_at_day_of_month{% else %} -- order_items.delivered_at_day_of_month is not selected {% endif %}
+{% if order_items.delivered_at_day_of_week._is_selected %} order_items.delivered_at_day_of_week{% else %} -- order_items.delivered_at_day_of_week is not selected {% endif %}
+{% if order_items.delivered_at_day_of_week_index._is_selected %} order_items.delivered_at_day_of_week_index{% else %} -- order_items.delivered_at_day_of_week_index is not selected {% endif %}
+{% if order_items.delivered_at_day_of_year._is_selected %} order_items.delivered_at_day_of_year{% else %} -- order_items.delivered_at_day_of_year is not selected {% endif %}
+{% if order_items.delivered_at_hour._is_selected %} order_items.delivered_at_hour{% else %} -- order_items.delivered_at_hour is not selected {% endif %}
+{% if order_items.delivered_at_hour_of_day._is_selected %} order_items.delivered_at_hour_of_day{% else %} -- order_items.delivered_at_hour_of_day is not selected {% endif %}
+{% if order_items.delivered_at_minute._is_selected %} order_items.delivered_at_minute{% else %} -- order_items.delivered_at_minute is not selected {% endif %}
+{% if order_items.delivered_at_month._is_selected %} order_items.delivered_at_month{% else %} -- order_items.delivered_at_month is not selected {% endif %}
+{% if order_items.delivered_at_month_num._is_selected %} order_items.delivered_at_month_num{% else %} -- order_items.delivered_at_month_num is not selected {% endif %}
+{% if order_items.delivered_at_month_name._is_selected %} order_items.delivered_at_month_name{% else %} -- order_items.delivered_at_month_name is not selected {% endif %}
+{% if order_items.delivered_at_quarter._is_selected %} order_items.delivered_at_quarter{% else %} -- order_items.delivered_at_quarter is not selected {% endif %}
+{% if order_items.delivered_at_quarter_of_year._is_selected %} order_items.delivered_at_quarter_of_year{% else %} -- order_items.delivered_at_quarter_of_year is not selected {% endif %}
+{% if order_items.delivered_at_raw._is_selected %} order_items.delivered_at_raw{% else %} -- order_items.delivered_at_raw is not selected {% endif %}
+{% if order_items.delivered_at_time._is_selected %} order_items.delivered_at_time{% else %} -- order_items.delivered_at_time is not selected {% endif %}
+{% if order_items.delivered_at_time_of_day._is_selected %} order_items.delivered_at_time_of_day{% else %} -- order_items.delivered_at_time_of_day is not selected {% endif %}
+{% if order_items.delivered_at_week._is_selected %} order_items.delivered_at_week{% else %} -- order_items.delivered_at_week is not selected {% endif %}
+{% if order_items.delivered_at_week_of_year._is_selected %} order_items.delivered_at_week_of_year{% else %} -- order_items.delivered_at_week_of_year is not selected {% endif %}
+{% if order_items.delivered_at_year._is_selected %} order_items.delivered_at_year{% else %} -- order_items.delivered_at_year is not selected {% endif %}
+{% if order_items.returned_at_date._is_selected %} order_items.returned_at_date{% else %} -- order_items.returned_at_date is not selected {% endif %}
+{% if order_items.returned_at_day_of_month._is_selected %} order_items.returned_at_day_of_month{% else %} -- order_items.returned_at_day_of_month is not selected {% endif %}
+{% if order_items.returned_at_day_of_week._is_selected %} order_items.returned_at_day_of_week{% else %} -- order_items.returned_at_day_of_week is not selected {% endif %}
+{% if order_items.returned_at_day_of_week_index._is_selected %} order_items.returned_at_day_of_week_index{% else %} -- order_items.returned_at_day_of_week_index is not selected {% endif %}
+{% if order_items.returned_at_day_of_year._is_selected %} order_items.returned_at_day_of_year{% else %} -- order_items.returned_at_day_of_year is not selected {% endif %}
+{% if order_items.returned_at_hour._is_selected %} order_items.returned_at_hour{% else %} -- order_items.returned_at_hour is not selected {% endif %}
+{% if order_items.returned_at_hour_of_day._is_selected %} order_items.returned_at_hour_of_day{% else %} -- order_items.returned_at_hour_of_day is not selected {% endif %}
+{% if order_items.returned_at_minute._is_selected %} order_items.returned_at_minute{% else %} -- order_items.returned_at_minute is not selected {% endif %}
+{% if order_items.returned_at_month._is_selected %} order_items.returned_at_month{% else %} -- order_items.returned_at_month is not selected {% endif %}
+{% if order_items.returned_at_month_num._is_selected %} order_items.returned_at_month_num{% else %} -- order_items.returned_at_month_num is not selected {% endif %}
+{% if order_items.returned_at_month_name._is_selected %} order_items.returned_at_month_name{% else %} -- order_items.returned_at_month_name is not selected {% endif %}
+{% if order_items.returned_at_quarter._is_selected %} order_items.returned_at_quarter{% else %} -- order_items.returned_at_quarter is not selected {% endif %}
+{% if order_items.returned_at_quarter_of_year._is_selected %} order_items.returned_at_quarter_of_year{% else %} -- order_items.returned_at_quarter_of_year is not selected {% endif %}
+{% if order_items.returned_at_raw._is_selected %} order_items.returned_at_raw{% else %} -- order_items.returned_at_raw is not selected {% endif %}
+{% if order_items.returned_at_time._is_selected %} order_items.returned_at_time{% else %} -- order_items.returned_at_time is not selected {% endif %}
+{% if order_items.returned_at_time_of_day._is_selected %} order_items.returned_at_time_of_day{% else %} -- order_items.returned_at_time_of_day is not selected {% endif %}
+{% if order_items.returned_at_week._is_selected %} order_items.returned_at_week{% else %} -- order_items.returned_at_week is not selected {% endif %}
+{% if order_items.returned_at_week_of_year._is_selected %} order_items.returned_at_week_of_year{% else %} -- order_items.returned_at_week_of_year is not selected {% endif %}
+{% if order_items.returned_at_year._is_selected %} order_items.returned_at_year{% else %} -- order_items.returned_at_year is not selected {% endif %}
+{% if order_items.sale_price._is_selected %} order_items.sale_price{% else %} -- order_items.sale_price is not selected {% endif %}
+{% if order_items.total_sale_price._is_selected %} order_items.total_sale_price{% else %} -- order_items.total_sale_price is not selected {% endif %}
+{% if order_items.test_2025._is_selected %} order_items.test_2025{% else %} -- order_items.test_2025 is not selected {% endif %}
+{% if orders.view_label._is_selected %} orders.view_label{% else %} -- orders.view_label is not selected {% endif %}
+{% if orders.primary_key._is_selected %} orders.primary_key{% else %} -- orders.primary_key is not selected {% endif %}
+{% if orders.count._is_selected %} orders.count{% else %} -- orders.count is not selected {% endif %}
+{% if orders.order_id._is_selected %} orders.order_id{% else %} -- orders.order_id is not selected {% endif %}
+{% if orders.user_id._is_selected %} orders.user_id{% else %} -- orders.user_id is not selected {% endif %}
+{% if orders.status._is_selected %} orders.status{% else %} -- orders.status is not selected {% endif %}
+{% if orders.gender._is_selected %} orders.gender{% else %} -- orders.gender is not selected {% endif %}
+{% if orders.created_at_date._is_selected %} orders.created_at_date{% else %} -- orders.created_at_date is not selected {% endif %}
+{% if orders.created_at_day_of_month._is_selected %} orders.created_at_day_of_month{% else %} -- orders.created_at_day_of_month is not selected {% endif %}
+{% if orders.created_at_day_of_week._is_selected %} orders.created_at_day_of_week{% else %} -- orders.created_at_day_of_week is not selected {% endif %}
+{% if orders.created_at_day_of_week_index._is_selected %} orders.created_at_day_of_week_index{% else %} -- orders.created_at_day_of_week_index is not selected {% endif %}
+{% if orders.created_at_day_of_year._is_selected %} orders.created_at_day_of_year{% else %} -- orders.created_at_day_of_year is not selected {% endif %}
+{% if orders.created_at_hour._is_selected %} orders.created_at_hour{% else %} -- orders.created_at_hour is not selected {% endif %}
+{% if orders.created_at_hour_of_day._is_selected %} orders.created_at_hour_of_day{% else %} -- orders.created_at_hour_of_day is not selected {% endif %}
+{% if orders.created_at_minute._is_selected %} orders.created_at_minute{% else %} -- orders.created_at_minute is not selected {% endif %}
+{% if orders.created_at_month._is_selected %} orders.created_at_month{% else %} -- orders.created_at_month is not selected {% endif %}
+{% if orders.created_at_month_num._is_selected %} orders.created_at_month_num{% else %} -- orders.created_at_month_num is not selected {% endif %}
+{% if orders.created_at_month_name._is_selected %} orders.created_at_month_name{% else %} -- orders.created_at_month_name is not selected {% endif %}
+{% if orders.created_at_quarter._is_selected %} orders.created_at_quarter{% else %} -- orders.created_at_quarter is not selected {% endif %}
+{% if orders.created_at_quarter_of_year._is_selected %} orders.created_at_quarter_of_year{% else %} -- orders.created_at_quarter_of_year is not selected {% endif %}
+{% if orders.created_at_raw._is_selected %} orders.created_at_raw{% else %} -- orders.created_at_raw is not selected {% endif %}
+{% if orders.created_at_time._is_selected %} orders.created_at_time{% else %} -- orders.created_at_time is not selected {% endif %}
+{% if orders.created_at_time_of_day._is_selected %} orders.created_at_time_of_day{% else %} -- orders.created_at_time_of_day is not selected {% endif %}
+{% if orders.created_at_week._is_selected %} orders.created_at_week{% else %} -- orders.created_at_week is not selected {% endif %}
+{% if orders.created_at_week_of_year._is_selected %} orders.created_at_week_of_year{% else %} -- orders.created_at_week_of_year is not selected {% endif %}
+{% if orders.created_at_year._is_selected %} orders.created_at_year{% else %} -- orders.created_at_year is not selected {% endif %}
+{% if orders.returned_at_date._is_selected %} orders.returned_at_date{% else %} -- orders.returned_at_date is not selected {% endif %}
+{% if orders.returned_at_day_of_month._is_selected %} orders.returned_at_day_of_month{% else %} -- orders.returned_at_day_of_month is not selected {% endif %}
+{% if orders.returned_at_day_of_week._is_selected %} orders.returned_at_day_of_week{% else %} -- orders.returned_at_day_of_week is not selected {% endif %}
+{% if orders.returned_at_day_of_week_index._is_selected %} orders.returned_at_day_of_week_index{% else %} -- orders.returned_at_day_of_week_index is not selected {% endif %}
+{% if orders.returned_at_day_of_year._is_selected %} orders.returned_at_day_of_year{% else %} -- orders.returned_at_day_of_year is not selected {% endif %}
+{% if orders.returned_at_hour._is_selected %} orders.returned_at_hour{% else %} -- orders.returned_at_hour is not selected {% endif %}
+{% if orders.returned_at_hour_of_day._is_selected %} orders.returned_at_hour_of_day{% else %} -- orders.returned_at_hour_of_day is not selected {% endif %}
+{% if orders.returned_at_minute._is_selected %} orders.returned_at_minute{% else %} -- orders.returned_at_minute is not selected {% endif %}
+{% if orders.returned_at_month._is_selected %} orders.returned_at_month{% else %} -- orders.returned_at_month is not selected {% endif %}
+{% if orders.returned_at_month_num._is_selected %} orders.returned_at_month_num{% else %} -- orders.returned_at_month_num is not selected {% endif %}
+{% if orders.returned_at_month_name._is_selected %} orders.returned_at_month_name{% else %} -- orders.returned_at_month_name is not selected {% endif %}
+{% if orders.returned_at_quarter._is_selected %} orders.returned_at_quarter{% else %} -- orders.returned_at_quarter is not selected {% endif %}
+{% if orders.returned_at_quarter_of_year._is_selected %} orders.returned_at_quarter_of_year{% else %} -- orders.returned_at_quarter_of_year is not selected {% endif %}
+{% if orders.returned_at_raw._is_selected %} orders.returned_at_raw{% else %} -- orders.returned_at_raw is not selected {% endif %}
+{% if orders.returned_at_time._is_selected %} orders.returned_at_time{% else %} -- orders.returned_at_time is not selected {% endif %}
+{% if orders.returned_at_time_of_day._is_selected %} orders.returned_at_time_of_day{% else %} -- orders.returned_at_time_of_day is not selected {% endif %}
+{% if orders.returned_at_week._is_selected %} orders.returned_at_week{% else %} -- orders.returned_at_week is not selected {% endif %}
+{% if orders.returned_at_week_of_year._is_selected %} orders.returned_at_week_of_year{% else %} -- orders.returned_at_week_of_year is not selected {% endif %}
+{% if orders.returned_at_year._is_selected %} orders.returned_at_year{% else %} -- orders.returned_at_year is not selected {% endif %}
+{% if orders.shipped_at_date._is_selected %} orders.shipped_at_date{% else %} -- orders.shipped_at_date is not selected {% endif %}
+{% if orders.shipped_at_day_of_month._is_selected %} orders.shipped_at_day_of_month{% else %} -- orders.shipped_at_day_of_month is not selected {% endif %}
+{% if orders.shipped_at_day_of_week._is_selected %} orders.shipped_at_day_of_week{% else %} -- orders.shipped_at_day_of_week is not selected {% endif %}
+{% if orders.shipped_at_day_of_week_index._is_selected %} orders.shipped_at_day_of_week_index{% else %} -- orders.shipped_at_day_of_week_index is not selected {% endif %}
+{% if orders.shipped_at_day_of_year._is_selected %} orders.shipped_at_day_of_year{% else %} -- orders.shipped_at_day_of_year is not selected {% endif %}
+{% if orders.shipped_at_hour._is_selected %} orders.shipped_at_hour{% else %} -- orders.shipped_at_hour is not selected {% endif %}
+{% if orders.shipped_at_hour_of_day._is_selected %} orders.shipped_at_hour_of_day{% else %} -- orders.shipped_at_hour_of_day is not selected {% endif %}
+{% if orders.shipped_at_minute._is_selected %} orders.shipped_at_minute{% else %} -- orders.shipped_at_minute is not selected {% endif %}
+{% if orders.shipped_at_month._is_selected %} orders.shipped_at_month{% else %} -- orders.shipped_at_month is not selected {% endif %}
+{% if orders.shipped_at_month_num._is_selected %} orders.shipped_at_month_num{% else %} -- orders.shipped_at_month_num is not selected {% endif %}
+{% if orders.shipped_at_month_name._is_selected %} orders.shipped_at_month_name{% else %} -- orders.shipped_at_month_name is not selected {% endif %}
+{% if orders.shipped_at_quarter._is_selected %} orders.shipped_at_quarter{% else %} -- orders.shipped_at_quarter is not selected {% endif %}
+{% if orders.shipped_at_quarter_of_year._is_selected %} orders.shipped_at_quarter_of_year{% else %} -- orders.shipped_at_quarter_of_year is not selected {% endif %}
+{% if orders.shipped_at_raw._is_selected %} orders.shipped_at_raw{% else %} -- orders.shipped_at_raw is not selected {% endif %}
+{% if orders.shipped_at_time._is_selected %} orders.shipped_at_time{% else %} -- orders.shipped_at_time is not selected {% endif %}
+{% if orders.shipped_at_time_of_day._is_selected %} orders.shipped_at_time_of_day{% else %} -- orders.shipped_at_time_of_day is not selected {% endif %}
+{% if orders.shipped_at_week._is_selected %} orders.shipped_at_week{% else %} -- orders.shipped_at_week is not selected {% endif %}
+{% if orders.shipped_at_week_of_year._is_selected %} orders.shipped_at_week_of_year{% else %} -- orders.shipped_at_week_of_year is not selected {% endif %}
+{% if orders.shipped_at_year._is_selected %} orders.shipped_at_year{% else %} -- orders.shipped_at_year is not selected {% endif %}
+{% if orders.delivered_at_date._is_selected %} orders.delivered_at_date{% else %} -- orders.delivered_at_date is not selected {% endif %}
+{% if orders.delivered_at_day_of_month._is_selected %} orders.delivered_at_day_of_month{% else %} -- orders.delivered_at_day_of_month is not selected {% endif %}
+{% if orders.delivered_at_day_of_week._is_selected %} orders.delivered_at_day_of_week{% else %} -- orders.delivered_at_day_of_week is not selected {% endif %}
+{% if orders.delivered_at_day_of_week_index._is_selected %} orders.delivered_at_day_of_week_index{% else %} -- orders.delivered_at_day_of_week_index is not selected {% endif %}
+{% if orders.delivered_at_day_of_year._is_selected %} orders.delivered_at_day_of_year{% else %} -- orders.delivered_at_day_of_year is not selected {% endif %}
+{% if orders.delivered_at_hour._is_selected %} orders.delivered_at_hour{% else %} -- orders.delivered_at_hour is not selected {% endif %}
+{% if orders.delivered_at_hour_of_day._is_selected %} orders.delivered_at_hour_of_day{% else %} -- orders.delivered_at_hour_of_day is not selected {% endif %}
+{% if orders.delivered_at_minute._is_selected %} orders.delivered_at_minute{% else %} -- orders.delivered_at_minute is not selected {% endif %}
+{% if orders.delivered_at_month._is_selected %} orders.delivered_at_month{% else %} -- orders.delivered_at_month is not selected {% endif %}
+{% if orders.delivered_at_month_num._is_selected %} orders.delivered_at_month_num{% else %} -- orders.delivered_at_month_num is not selected {% endif %}
+{% if orders.delivered_at_month_name._is_selected %} orders.delivered_at_month_name{% else %} -- orders.delivered_at_month_name is not selected {% endif %}
+{% if orders.delivered_at_quarter._is_selected %} orders.delivered_at_quarter{% else %} -- orders.delivered_at_quarter is not selected {% endif %}
+{% if orders.delivered_at_quarter_of_year._is_selected %} orders.delivered_at_quarter_of_year{% else %} -- orders.delivered_at_quarter_of_year is not selected {% endif %}
+{% if orders.delivered_at_raw._is_selected %} orders.delivered_at_raw{% else %} -- orders.delivered_at_raw is not selected {% endif %}
+{% if orders.delivered_at_time._is_selected %} orders.delivered_at_time{% else %} -- orders.delivered_at_time is not selected {% endif %}
+{% if orders.delivered_at_time_of_day._is_selected %} orders.delivered_at_time_of_day{% else %} -- orders.delivered_at_time_of_day is not selected {% endif %}
+{% if orders.delivered_at_week._is_selected %} orders.delivered_at_week{% else %} -- orders.delivered_at_week is not selected {% endif %}
+{% if orders.delivered_at_week_of_year._is_selected %} orders.delivered_at_week_of_year{% else %} -- orders.delivered_at_week_of_year is not selected {% endif %}
+{% if orders.delivered_at_year._is_selected %} orders.delivered_at_year{% else %} -- orders.delivered_at_year is not selected {% endif %}
+{% if orders.num_of_item._is_selected %} orders.num_of_item{% else %} -- orders.num_of_item is not selected {% endif %}
+{% if products.view_label._is_selected %} products.view_label{% else %} -- products.view_label is not selected {% endif %}
+{% if products.primary_key._is_selected %} products.primary_key{% else %} -- products.primary_key is not selected {% endif %}
+{% if products.count._is_selected %} products.count{% else %} -- products.count is not selected {% endif %}
+{% if products.id._is_selected %} products.id{% else %} -- products.id is not selected {% endif %}
+{% if products.cost._is_selected %} products.cost{% else %} -- products.cost is not selected {% endif %}
+{% if products.category._is_selected %} products.category{% else %} -- products.category is not selected {% endif %}
+{% if products.name._is_selected %} products.name{% else %} -- products.name is not selected {% endif %}
+{% if products.brand._is_selected %} products.brand{% else %} -- products.brand is not selected {% endif %}
+{% if products.retail_price._is_selected %} products.retail_price{% else %} -- products.retail_price is not selected {% endif %}
+{% if products.department._is_selected %} products.department{% else %} -- products.department is not selected {% endif %}
+{% if products.sku._is_selected %} products.sku{% else %} -- products.sku is not selected {% endif %}
+{% if products.distribution_center_id._is_selected %} products.distribution_center_id{% else %} -- products.distribution_center_id is not selected {% endif %}
+{% if users.view_label._is_selected %} users.view_label{% else %} -- users.view_label is not selected {% endif %}
+{% if users.primary_key._is_selected %} users.primary_key{% else %} -- users.primary_key is not selected {% endif %}
+{% if users.count._is_selected %} users.count{% else %} -- users.count is not selected {% endif %}
+{% if users.id._is_selected %} users.id{% else %} -- users.id is not selected {% endif %}
+{% if users.first_name._is_selected %} users.first_name{% else %} -- users.first_name is not selected {% endif %}
+{% if users.last_name._is_selected %} users.last_name{% else %} -- users.last_name is not selected {% endif %}
+{% if users.email._is_selected %} users.email{% else %} -- users.email is not selected {% endif %}
+{% if users.age._is_selected %} users.age{% else %} -- users.age is not selected {% endif %}
+{% if users.gender._is_selected %} users.gender{% else %} -- users.gender is not selected {% endif %}
+{% if users.state._is_selected %} users.state{% else %} -- users.state is not selected {% endif %}
+{% if users.street_address._is_selected %} users.street_address{% else %} -- users.street_address is not selected {% endif %}
+{% if users.postal_code._is_selected %} users.postal_code{% else %} -- users.postal_code is not selected {% endif %}
+{% if users.city._is_selected %} users.city{% else %} -- users.city is not selected {% endif %}
+{% if users.country._is_selected %} users.country{% else %} -- users.country is not selected {% endif %}
+{% if users.latitude._is_selected %} users.latitude{% else %} -- users.latitude is not selected {% endif %}
+{% if users.longitude._is_selected %} users.longitude{% else %} -- users.longitude is not selected {% endif %}
+{% if users.traffic_source._is_selected %} users.traffic_source{% else %} -- users.traffic_source is not selected {% endif %}
+{% if users.created_at_date._is_selected %} users.created_at_date{% else %} -- users.created_at_date is not selected {% endif %}
+{% if users.created_at_day_of_month._is_selected %} users.created_at_day_of_month{% else %} -- users.created_at_day_of_month is not selected {% endif %}
+{% if users.created_at_day_of_week._is_selected %} users.created_at_day_of_week{% else %} -- users.created_at_day_of_week is not selected {% endif %}
+{% if users.created_at_day_of_week_index._is_selected %} users.created_at_day_of_week_index{% else %} -- users.created_at_day_of_week_index is not selected {% endif %}
+{% if users.created_at_day_of_year._is_selected %} users.created_at_day_of_year{% else %} -- users.created_at_day_of_year is not selected {% endif %}
+{% if users.created_at_hour._is_selected %} users.created_at_hour{% else %} -- users.created_at_hour is not selected {% endif %}
+{% if users.created_at_hour_of_day._is_selected %} users.created_at_hour_of_day{% else %} -- users.created_at_hour_of_day is not selected {% endif %}
+{% if users.created_at_minute._is_selected %} users.created_at_minute{% else %} -- users.created_at_minute is not selected {% endif %}
+{% if users.created_at_month._is_selected %} users.created_at_month{% else %} -- users.created_at_month is not selected {% endif %}
+{% if users.created_at_month_num._is_selected %} users.created_at_month_num{% else %} -- users.created_at_month_num is not selected {% endif %}
+{% if users.created_at_month_name._is_selected %} users.created_at_month_name{% else %} -- users.created_at_month_name is not selected {% endif %}
+{% if users.created_at_quarter._is_selected %} users.created_at_quarter{% else %} -- users.created_at_quarter is not selected {% endif %}
+{% if users.created_at_quarter_of_year._is_selected %} users.created_at_quarter_of_year{% else %} -- users.created_at_quarter_of_year is not selected {% endif %}
+{% if users.created_at_raw._is_selected %} users.created_at_raw{% else %} -- users.created_at_raw is not selected {% endif %}
+{% if users.created_at_time._is_selected %} users.created_at_time{% else %} -- users.created_at_time is not selected {% endif %}
+{% if users.created_at_time_of_day._is_selected %} users.created_at_time_of_day{% else %} -- users.created_at_time_of_day is not selected {% endif %}
+{% if users.created_at_week._is_selected %} users.created_at_week{% else %} -- users.created_at_week is not selected {% endif %}
+{% if users.created_at_week_of_year._is_selected %} users.created_at_week_of_year{% else %} -- users.created_at_week_of_year is not selected {% endif %}
+{% if users.created_at_year._is_selected %} users.created_at_year{% else %} -- users.created_at_year is not selected {% endif %}
+{% if users.location._is_selected %} users.location{% else %} -- users.location is not selected {% endif %}
+{% if users.location_bin_level._is_selected %} users.location_bin_level{% else %} -- users.location_bin_level is not selected {% endif %}
+{% if users.location_latitude_min._is_selected %} users.location_latitude_min{% else %} -- users.location_latitude_min is not selected {% endif %}
+{% if users.location_latitude_max._is_selected %} users.location_latitude_max{% else %} -- users.location_latitude_max is not selected {% endif %}
+{% if users.location_longitude_min._is_selected %} users.location_longitude_min{% else %} -- users.location_longitude_min is not selected {% endif %}
+{% if users.location_longitude_max._is_selected %} users.location_longitude_max{% else %} -- users.location_longitude_max is not selected {% endif %}
+    ;;
+  }
+
+}

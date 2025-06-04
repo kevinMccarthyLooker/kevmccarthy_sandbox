@@ -543,3 +543,189 @@ view: order_items_field_list {
   }
 
 }
+
+
+include: "/hll_test2.view.lkml"
+
+
+view: +order_items {
+  measure: sales_completed {
+    type: sum
+    sql: ${sale_price} ;;
+    filters: [status: "Complete"]
+  }
+  measure: complete_sales_dollar_percent {
+    type: number
+    sql: ${sales_completed}/${sales_completed} ;;
+    value_format_name: percent_1
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+view: order_items_with_special_bucket_of_fields_kasin_20250530 {
+  view_label: "Order Items"
+  sql_table_name: `bigquery-public-data.thelook_ecommerce.order_items` ;;
+  dimension: created_date {
+    type: date
+    sql: ${TABLE}.created_at ;;
+  }
+  dimension: status {}
+  dimension: sale_price {type:number}
+  measure: count {type:count}
+  measure: total_sales {
+    label: "Total Sales Original"
+    # hidden: yes #maybe hide this after re-implemented it in the other view
+    type:sum
+    sql:${sale_price};;
+  }
+}
+
+view: special_view_for_targeted_in_query_check {
+  #note that view is 'sourceless' (so can't use ${TABLE})
+  measure: total_sales {
+    view_label: "Order Items" # probably want to curate view labels in these special fields
+    type:sum
+    sql:${order_items_with_special_bucket_of_fields_kasin_20250530.sale_price};;
+  }
+}
+explore: order_items_with_special_bucket_of_fields_kasin_20250530 {
+  #'bare-joining view'.. no actual join happens
+  join: special_view_for_targeted_in_query_check {sql: /*this is where the join would go */;; relationship:one_to_one}
+  #example use of in_query logic:
+  sql_always_where:
+  {% if special_view_for_targeted_in_query_check._in_query %}
+    ${order_items_with_special_bucket_of_fields_kasin_20250530.created_date}>'2025-01-01'
+  {% endif %};;
+}
+
+
+##bare join example problem
+view: bare_join_sym_aggs_problem_base {
+  derived_table: {sql: select id as base_id from unnest([1,2,3]) as id /*multi-row example base table*/;;}
+  dimension: base_id {}
+  dimension: pk {
+    primary_key:yes
+    sql: ${base_id} ;;
+  }
+  measure: count {#type:count}
+    type: sum #use a sum instead.. actually has a sql param i can use, but still 'counting'
+    sql: ${placeholder} ;;
+  }
+  dimension: placeholder {type:number sql:1;;}
+}
+view: bare_join_sym_aggs_problem_one_to_many {
+  derived_table: {sql: select id as base_id,to_many_id as to_many_id from unnest([1,2,3]) as id left join unnest(['a','b','c']) as to_many_id /*multi-row example base table*/;;}
+  dimension: base_id {}
+  dimension: to_many_id {}
+  dimension: pk {
+    primary_key: yes
+    sql:concat(${base_id},${to_many_id});;
+  }
+  measure: count {type:count}
+}
+view: referencing_a_measure_in_a_bare_joined_view_to_cause_a_problem {
+  #should be same as bare_join_sym_aggs_problem_base.count, but fails to adhere to sym aggs
+  measure: problem {
+    type: sum #use a sum instead.. actually has a sql param i can use, but still 'counting'
+    sql: ${bare_join_sym_aggs_problem_base.placeholder};;
+  }
+  dimension: pk {
+    primary_key: yes
+    sql:concat(${bare_join_sym_aggs_problem_base.pk},${bare_join_sym_aggs_problem_base.pk});;
+  }
+}
+
+explore: bare_join_sym_aggs_problem_base {
+  join: bare_join_sym_aggs_problem_one_to_many {
+    relationship: one_to_many
+    sql_on: ${bare_join_sym_aggs_problem_one_to_many.base_id}=${bare_join_sym_aggs_problem_base.base_id} ;;
+  }
+  join: referencing_a_measure_in_a_bare_joined_view_to_cause_a_problem {relationship: one_to_one sql: ;;}
+}
+
+
+
+view: order_items_for_test_override_bind_all {
+  view_label: "Order Items"
+  sql_table_name: `bigquery-public-data.thelook_ecommerce.order_items` ;;
+  dimension: created_date {type: date sql: ${TABLE}.created_at ;;}
+  dimension: status {}
+  dimension: sale_price {type:number}
+  dimension: is_dt_if_selected_toggle {sql:'placeholder';;}
+  parameter: date_filter_parameter {type:date}
+  measure: total_sales {
+    type:sum
+    sql:${sale_price};;
+  }
+  measure: count {type:count}
+
+  parameter: measure_selector_for_user_query {}
+  parameter: measure_selector_for_dt {}
+  measure: dynamic_measure {type: number
+    sql:
+{% if measure_selector_for_dt._parameter_value == "'sales'" %}${total_sales}
+{%else%}
+  {% if measure_selector_for_user_query._parameter_value == "'sales'" %}${total_sales}{%else%}${count}{%endif%}
+{%endif%}
+  ;;
+  }
+}
+view: order_items__dt_for_test_override_bind_all {
+  derived_table: {
+    explore_source: order_items_for_test_override_bind_all {
+      column: status {}
+      column: is_dt_if_selected_toggle {}
+      column: total_sales {}
+      column: dynamic_measure {}
+      bind_all_filters: yes
+
+      filters: [
+        order_items_for_test_override_bind_all.measure_selector_for_dt: "sales",
+        order_items_for_test_override_bind_all.created_date: ""
+      ]
+    }
+  }
+  dimension: status {}
+  dimension: total_sales_for_status {sql:${TABLE}.total_sales;;}
+  dimension: dynamic_measure {sql:${TABLE}.dynamic_measure;;}
+}
+# view: order_items__dt_for_test_override_bind_all_sql {
+#   extends: [order_items__dt_for_test_override_bind_all]
+#   sql_table_name: ${EXTENDED}  ;;
+#   # derived_table: {
+#   #   # sql: ${EXTENDED} ;;
+#   # }
+#   dimension: test {}
+# }
+explore: order_items_for_test_override_bind_all {
+  join: order_items__dt_for_test_override_bind_all {
+    relationship: many_to_one
+    sql_on: ${order_items_for_test_override_bind_all.status}= ${order_items__dt_for_test_override_bind_all.status} ;;
+  }
+  # join: order_items__dt_for_test_override_bind_all_sql {relationship:one_to_one sql:;;}
+  sql_always_where:
+  --is_dt_if_selected_toggle._is_selected:{{is_dt_if_selected_toggle._is_selected}}
+  {% if is_dt_if_selected_toggle._is_selected %}{%else%}{%condition date_filter_parameter %}${created_date}{% endcondition %}{% endif %} ;;
+}

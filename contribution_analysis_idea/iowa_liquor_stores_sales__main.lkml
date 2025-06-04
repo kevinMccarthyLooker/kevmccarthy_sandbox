@@ -264,75 +264,76 @@ view: insights_table_test {
 }
   explore: insights_table_test {}
 
+#errors appeared in validator when i wasn't working on this 5/30, so commented out
 view: insights_table {
-  derived_table: {
-    persist_for: "24 hour"
+  # derived_table: {
+  #   persist_for: "24 hour"
 
-    create_process: {
+  #   create_process: {
 
-      ## STEP 1: create or replace the training data table
-      sql_step:
-      --following contribution analysis blog https://cloud.google.com/blog/products/data-analytics/introducing-a-new-contribution-analysis-model-in-bigquery
-      CREATE OR REPLACE TABLE thekitchentable.iowaliquor.iowa_liquor_sales_control_and_test AS
-      (SELECT
-        store_name,
-        city,
-        vendor_name,
-        category_name,
-        item_description,
-        SUM(sale_dollars) AS total_sales,
-        FALSE AS is_test
-      FROM `bigquery-public-data.iowa_liquor_sales.sales`
-      WHERE
-      --EXTRACT(YEAR FROM date) = 2022
-      EXTRACT(YEAR FROM date) = 2024 and EXTRACT(MONTH FROM date) = 1
-      and sale_dollars>0 --resolve error For Contribution Analysis models with a min_apriori_support value greater than 0, all 'total_sales' values must be non-negative.
-      GROUP BY store_name, city, vendor_name,
-        category_name, item_description, is_test
-      )
-      UNION ALL
-      (SELECT
-        store_name,
-        city,
-        vendor_name,
-        category_name,
-        item_description,
-        SUM(sale_dollars) AS total_sales,
-        TRUE AS is_test
-      FROM `bigquery-public-data.iowa_liquor_sales.sales`
-      WHERE
-      --EXTRACT(YEAR FROM date) = 2023
-      EXTRACT(YEAR FROM date) = 2024 and EXTRACT(MONTH FROM date) = 2
-      and sale_dollars>0 --resolve error For Contribution Analysis models with a min_apriori_support value greater than 0, all 'total_sales' values must be non-negative.
-      GROUP BY store_name, city, vendor_name,
-        category_name, item_description, is_test
-      )
-                  ;;
+  #     ## STEP 1: create or replace the training data table
+  #     sql_step:
+  #     --following contribution analysis blog https://cloud.google.com/blog/products/data-analytics/introducing-a-new-contribution-analysis-model-in-bigquery
+  #     CREATE OR REPLACE TABLE thekitchentable.iowaliquor.iowa_liquor_sales_control_and_test AS
+  #     (SELECT
+  #       store_name,
+  #       city,
+  #       vendor_name,
+  #       category_name,
+  #       item_description,
+  #       SUM(sale_dollars) AS total_sales,
+  #       FALSE AS is_test
+  #     FROM `bigquery-public-data.iowa_liquor_sales.sales`
+  #     WHERE
+  #     --EXTRACT(YEAR FROM date) = 2022
+  #     EXTRACT(YEAR FROM date) = 2024 and EXTRACT(MONTH FROM date) = 1
+  #     and sale_dollars>0 --resolve error For Contribution Analysis models with a min_apriori_support value greater than 0, all 'total_sales' values must be non-negative.
+  #     GROUP BY store_name, city, vendor_name,
+  #       category_name, item_description, is_test
+  #     )
+  #     UNION ALL
+  #     (SELECT
+  #       store_name,
+  #       city,
+  #       vendor_name,
+  #       category_name,
+  #       item_description,
+  #       SUM(sale_dollars) AS total_sales,
+  #       TRUE AS is_test
+  #     FROM `bigquery-public-data.iowa_liquor_sales.sales`
+  #     WHERE
+  #     --EXTRACT(YEAR FROM date) = 2023
+  #     EXTRACT(YEAR FROM date) = 2024 and EXTRACT(MONTH FROM date) = 2
+  #     and sale_dollars>0 --resolve error For Contribution Analysis models with a min_apriori_support value greater than 0, all 'total_sales' values must be non-negative.
+  #     GROUP BY store_name, city, vendor_name,
+  #       category_name, item_description, is_test
+  #     )
+  #                 ;;
 
-      sql_step:
-      CREATE OR REPLACE MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model
-        OPTIONS(
-          model_type = 'CONTRIBUTION_ANALYSIS',
-          contribution_metric =
-            'sum(total_sales)',
-          dimension_id_cols = ['store_name', 'city',
-            'vendor_name', 'category_name', 'item_description'],
-          is_test_col = 'is_test',
-          min_apriori_support = 0.001
-      ) AS
-      SELECT * FROM thekitchentable.iowaliquor.iowa_liquor_sales_control_and_test;
-                ;;
+  #     sql_step:
+  #     CREATE OR REPLACE MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model
+  #       OPTIONS(
+  #         model_type = 'CONTRIBUTION_ANALYSIS',
+  #         contribution_metric =
+  #           'sum(total_sales)',
+  #         dimension_id_cols = ['store_name', 'city',
+  #           'vendor_name', 'category_name', 'item_description'],
+  #         is_test_col = 'is_test',
+  #         min_apriori_support = 0.001
+  #     ) AS
+  #     SELECT * FROM thekitchentable.iowaliquor.iowa_liquor_sales_control_and_test;
+  #               ;;
 
-      sql_step:
-      CREATE OR REPLACE TABLE ${SQL_TABLE_NAME} AS
-      (SELECT
-         *
-       FROM ML.GET_INSIGHTS(
-         MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model)
-       ORDER BY unexpected_difference DESC)
-            ;;
-    }
-  }
+  #     sql_step:
+  #     CREATE OR REPLACE TABLE ${SQL_TABLE_NAME} AS
+  #     (SELECT
+  #       *
+  #     FROM ML.GET_INSIGHTS(
+  #       MODEL thekitchentable.iowaliquor.iowa_liquor_sales_contribution_analysis_model)
+  #     ORDER BY unexpected_difference DESC)
+  #           ;;
+  #   }
+  # }
 }
 view: insights {
 #   derived_table: {

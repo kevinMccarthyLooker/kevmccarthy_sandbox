@@ -49,7 +49,9 @@ application: simple_extension_km {
     new_window: yes
     new_window_external_urls: []
     local_storage: yes
-    external_api_urls: []
+    # external_api_urls: []
+    external_api_urls : ["https://localhost:8080","http://localhost:8080"]
+
   }
   mount_points: {
     dashboard_vis: no

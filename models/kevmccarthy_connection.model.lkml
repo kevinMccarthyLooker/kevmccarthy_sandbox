@@ -58,15 +58,19 @@ select 2 as id, 102 as value
 }
 explore: is_drill_filter_logic_passed_through_20250423 {}
 
+##
+#1) trying to make an ALL_FIEDS.  result of api call was used with sheets formulas to generate the all_fields_results. .'order_items_with_hll.user_id:{{_filters["order_items_with_hll.user_id"]  | sql_quote | replace: "'",""}};order_items_with_hll.status:{{_filters["order_items_with_hll.status"]  | sql_quote | replace: "'",""}}; order_items_with_hll.filter_field_yesno:{{_filters["order_items_with_hll.filter_field_yesno"]  | sql_quote | replace: "'",""}}'
+#2) HLL for count distinct
 view: order_items_with_hll {
   derived_table: {
     sql:
     select
     user_id,
+    status,
     HLL_COUNT.INIT(id) AS hll_sketch,
-{% assign all_fields_results = 'order_items_with_hll.user_id,order_items_with_hll.filter_field_yesno,order_items_with_hll.hll_field,order_items_with_hll.drill_with_filter_field_helper,order_items_with_hll.hll_based_measure,order_items_with_hll.count_distinct_user_id' | split:','%}
+{% assign all_fields_results = 'order_items_with_hll.user_id,order_items_with_hll.status,order_items_with_hll.filter_field_yesno,order_items_with_hll.hll_field,order_items_with_hll.drill_with_filter_field_helper,order_items_with_hll.hll_based_measure,order_items_with_hll.count_distinct_user_id' | split:','%}
 '{% for field in all_fields_results %}{{field}}:{{_filters[field]  | sql_quote | replace: "'","\'"}}{%endfor%}'
-'order_items_with_hll.user_id:{{_filters["order_items_with_hll.user_id"]  | sql_quote | replace: "'",""}}; order_items_with_hll.filter_field_yesno:{{_filters["order_items_with_hll.filter_field_yesno"]  | sql_quote | replace: "'",""}}' as all_fields_with_filters_string
+ as all_fields_with_filters_string
 
     /* filters applied:
      "order_items_with_hll.filter_field_yesno",
@@ -94,6 +98,7 @@ view: order_items_with_hll {
   dimension: all_fields_with_filters_string {
 
   }
+  dimension: status {}
   dimension: user_id {type:number}
   dimension: user_id_mod_2 {
     type: number
@@ -169,7 +174,9 @@ view: order_items_with_hll {
   # }
 
 }
-explore:order_items_with_hll  {}
+explore:order_items_with_hll  {
+
+}
 
 
 view: in_query_with_custom_fields {
@@ -249,3 +256,19 @@ explore: pop_test_explore {
 
 
 include: "/**/create_process_for_custom_incremental_PDT_test.lkml"
+
+view: order_items_basic {
+  sql_table_name: `bigquery-public-data.thelook_ecommerce.order_items` ;;
+  dimension_group: created {
+    type: time
+    timeframes: [minute,date,month]
+    sql: ${TABLE}.created_at ;;
+  }
+  dimension_group: delivered {
+    type: time
+    timeframes: [minute,date,month]
+    sql: ${TABLE}.delivered_at ;;
+  }
+  measure: count {type:count}
+}
+explore: order_items_basic {}

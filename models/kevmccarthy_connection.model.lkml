@@ -302,9 +302,17 @@ view: studio_in_looker_params_test_order_items {
   parameter: unquoted_parameter {type:unquoted}
 
 }
-
+include: "//thelook_ecommerce_autogen_files/auto_gen_views/users.view.lkml"
+view: studio_in_looker_params_test_users {
+  view_label: "Users"
+  extends: [users]
+  dimension: country {map_layer_name:countries}
+}
 explore: studio_in_looker_params_test_order_items {
-
+  join: studio_in_looker_params_test_users {
+    relationship: many_to_one
+    sql_on: ${studio_in_looker_params_test_order_items.user_id}=${studio_in_looker_params_test_users.id} ;;
+  }
   sql_always_where:
   {% condition string_parameter_with_allowed_values_and_suggest_dimension%}${studio_in_looker_params_test_order_items.status}{%endcondition%}
   ;;

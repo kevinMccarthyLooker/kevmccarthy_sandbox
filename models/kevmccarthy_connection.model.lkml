@@ -307,6 +307,10 @@ view: studio_in_looker_params_test_order_items {
     type: count
     drill_fields: [status]
   }
+  measure: total_sales_with_alternate_format_usd_0 {
+    type:sum sql:${sale_price};;
+    value_format_name:usd_0
+  }
 
 }
 include: "//thelook_ecommerce_autogen_files/auto_gen_views/users.view.lkml"

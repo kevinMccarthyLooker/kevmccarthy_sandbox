@@ -291,6 +291,12 @@ view: studio_in_looker_params_test_order_items {
     allowed_value: {value:"test value 1"}
     allowed_value: {value:"test value 2"}
   }
+  parameter: string_parameter_with_allowed_values_and_suggest_dimension {
+    type:string
+    suggest_dimension: status
+    allowed_value: {value:"Cancelled"}
+    allowed_value: {value:"Complete"}
+  }
   parameter: unquoted_parameter {type:unquoted}
 }
 

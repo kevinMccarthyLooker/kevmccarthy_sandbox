@@ -285,6 +285,8 @@ include: "//thelook_ecommerce_autogen_files/auto_gen_views/order_items.view.lkml
 view: studio_in_looker_params_test_order_items {
   view_label: "Order Items"
   extends: [order_items]
+  measure: total_sales {type:sum sql:${sale_price};;}
+
   parameter: string_parameter {type:string}
   dimension: show_string_parameter_being_used {sql:concat('the value entered was:',{{string_parameter._parameter_value}});;}
 
@@ -307,6 +309,7 @@ view: studio_in_looker_params_test_users {
   view_label: "Users"
   extends: [users]
   dimension: country {map_layer_name:countries}
+
 }
 explore: studio_in_looker_params_test_order_items {
   join: studio_in_looker_params_test_users {

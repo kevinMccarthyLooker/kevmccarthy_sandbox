@@ -286,7 +286,11 @@ view: studio_in_looker_params_test_order_items {
   view_label: "Order Items"
   extends: [order_items]
   parameter: string_parameter {type:string}
-  parameter: string_parameter_with_allowed_values {type:string}
+  parameter: string_parameter_with_allowed_values {
+    type:string
+    allowed_value: {value:"test value 1"}
+    allowed_value: {value:"test value 2"}
+  }
   parameter: unquoted_parameter {type:unquoted}
 }
 

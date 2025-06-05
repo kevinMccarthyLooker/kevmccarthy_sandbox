@@ -221,7 +221,13 @@ view: date_test {
     ;;
 
   }
-  dimension: a_string {}
+  dimension: a_string {
+    # case: {
+    #   when: {sql:${TABLE}.a_string='value';;label:"value"}
+    #   when: {sql:${TABLE}.a_string='value';;label:"value"}
+    #   else: "other"
+    # }
+  }
   dimension: a_number {}
   measure: a_max{
     type: max
@@ -272,3 +278,16 @@ view: order_items_basic {
   measure: count {type:count}
 }
 explore: order_items_basic {}
+
+
+########## # Testing Studio in Looker # {
+include: "//thelook_ecommerce_autogen_files/auto_gen_views/order_items.view.lkml"
+view: studio_in_looker_params_test_order_items {
+  view_label: "Order Items"
+  extends: [order_items]
+  parameter: string_parameter {type:string}
+  parameter: string_parameter_with_allowed_values {type:string}
+}
+
+explore: studio_in_looker_params_test_order_items {}
+########## # } Testing Studio in Looker ##########

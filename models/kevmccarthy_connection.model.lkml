@@ -287,6 +287,7 @@ view: studio_in_looker_params_test_order_items {
   extends: [order_items]
   parameter: string_parameter {type:string}
   parameter: string_parameter_with_allowed_values {type:string}
+  parameter: unquoted_parameter {type:unquoted}
 }
 
 explore: studio_in_looker_params_test_order_items {}

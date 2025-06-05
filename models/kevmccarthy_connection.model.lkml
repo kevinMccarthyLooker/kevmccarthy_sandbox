@@ -303,6 +303,11 @@ view: studio_in_looker_params_test_order_items {
   }
   parameter: unquoted_parameter {type:unquoted}
 
+  measure: count_with_drill {
+    type: count
+    drill_fields: [status]
+  }
+
 }
 include: "//thelook_ecommerce_autogen_files/auto_gen_views/users.view.lkml"
 view: studio_in_looker_params_test_users {

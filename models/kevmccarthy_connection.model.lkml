@@ -300,5 +300,10 @@ view: studio_in_looker_params_test_order_items {
   parameter: unquoted_parameter {type:unquoted}
 }
 
-explore: studio_in_looker_params_test_order_items {}
+explore: studio_in_looker_params_test_order_items {
+
+  sql_always_where:
+  {% condition string_parameter_with_allowed_values_and_suggest_dimension%}${studio_in_looker_params_test_order_items.status}{%endcondition%}
+  ;;
+}
 ########## # } Testing Studio in Looker ##########

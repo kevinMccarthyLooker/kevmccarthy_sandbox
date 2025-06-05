@@ -286,7 +286,8 @@ view: studio_in_looker_params_test_order_items {
   view_label: "Order Items"
   extends: [order_items]
   parameter: string_parameter {type:string}
-  dimension: show_string_parameter_being_used {sql:concat('the value entered was:{{string_parameter._parameter_value}}';;}
+  dimension: show_string_parameter_being_used {sql:concat('the value entered was:',{{string_parameter._parameter_value}});;}
+
   parameter: string_parameter_with_allowed_values {
     type:string
     allowed_value: {value:"test value 1"}

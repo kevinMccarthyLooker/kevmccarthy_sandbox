@@ -317,7 +317,20 @@ include: "//thelook_ecommerce_autogen_files/auto_gen_views/users.view.lkml"
 view: studio_in_looker_params_test_users {
   view_label: "Users"
   extends: [users]
+  #testing map layer
   dimension: country {map_layer_name:countries}
+  dimension: test_field_with_description {
+    description: "Description defined in lookml model"
+    sql: 'placeholder' ;;
+  }
+  dimension: test_field_with_group_label_1 {
+    group_label: "custom field group"
+    sql: 'placeholder' ;;
+  }
+  dimension: test_field_with_group_label_2 {
+    group_label: "custom field group"
+    sql: 'placeholder' ;;
+  }
 
 }
 explore: studio_in_looker_params_test_order_items {

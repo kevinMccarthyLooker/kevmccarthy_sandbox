@@ -311,6 +311,10 @@ view: studio_in_looker_params_test_order_items {
     type:sum sql:${sale_price};;
     value_format_name:usd_0
   }
+  measure: avg_sales_price {
+    type: average
+    sql: ${sale_price} ;;
+  }
 
 }
 include: "//thelook_ecommerce_autogen_files/auto_gen_views/users.view.lkml"

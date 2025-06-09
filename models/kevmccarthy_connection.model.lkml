@@ -319,6 +319,7 @@ view: studio_in_looker_params_test_users {
   extends: [users]
   #testing map layer
   dimension: country {map_layer_name:countries}
+  dimension: drill_test_country {drill_fields:[state]}
   dimension: test_field_with_description {
     description: "Description defined in lookml model"
     sql: 'placeholder' ;;

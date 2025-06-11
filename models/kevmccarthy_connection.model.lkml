@@ -315,6 +315,10 @@ view: studio_in_looker_params_test_order_items {
     type: average
     sql: ${sale_price} ;;
   }
+  measure: type_number_measure_with_division {
+    type: number
+    sql: ${total_sales}/nullif(${count},0) ;;
+  }
 
 }
 include: "//thelook_ecommerce_autogen_files/auto_gen_views/users.view.lkml"

@@ -320,6 +320,11 @@ view: studio_in_looker_params_test_order_items {
     sql: ${total_sales}/nullif(${count},0) ;;
   }
 
+  measure: min_created_date {
+    type: date
+    sql: min(${created_at_time}) ;;
+  }
+
 }
 include: "//thelook_ecommerce_autogen_files/auto_gen_views/users.view.lkml"
 view: studio_in_looker_params_test_users {

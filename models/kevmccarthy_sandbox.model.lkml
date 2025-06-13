@@ -729,3 +729,25 @@ explore: order_items_for_test_override_bind_all {
   --is_dt_if_selected_toggle._is_selected:{{is_dt_if_selected_toggle._is_selected}}
   {% if is_dt_if_selected_toggle._is_selected %}{%else%}{%condition date_filter_parameter %}${created_date}{% endcondition %}{% endif %} ;;
 }
+
+
+view: order_itmes_custom_html_examples_202506 {
+  extends: [order_items]
+  measure: example_single_value_viz_specific_html {
+    type: sum
+    sql: 1 ;;
+    html:
+<div class="vis">
+<div class="vis-single-value">
+<font color="#5A2FC2" size="6" ><center><b>Using div class = vis we get a white background, and override the 500px default.<br>
+{{rendered_value}}</b></center></font>
+</div>
+</div>
+ ;;
+
+
+  }
+
+}
+
+explore: order_itmes_custom_html_examples_202506 {}

@@ -302,6 +302,11 @@ view: studio_in_looker_params_test_order_items {
     allowed_value: {value:"Complete"}
   }
   parameter: unquoted_parameter {type:unquoted}
+  parameter: number_parameter {type: number}
+  measure: measure_that_sums_a_parameter {
+    type: sum
+    sql: {{ number_parameter._parameter_value}} ;;
+  }
 
   measure: count_with_drill {
     type: count

@@ -301,11 +301,27 @@ view: studio_in_looker_params_test_order_items {
     allowed_value: {value:"Cancelled"}
     allowed_value: {value:"Complete"}
   }
+  parameter: string_parameter_with_suggest_dimension {
+    type:string
+    suggest_dimension: status
+  }
+
   parameter: unquoted_parameter {type:unquoted}
   parameter: number_parameter {type: number}
   measure: measure_that_sums_a_parameter {
     type: sum
     sql: {{ number_parameter._parameter_value}} ;;
+  }
+
+  measure: measure_sale_price_where_string_parameter_matches_status {
+    type: sum
+    sql:
+    case when {{string_parameter_with_suggest_dimension._parameter_value}} = ${status}
+    then ${sale_price}
+    else null
+    end
+    ;;
+
   }
 
   measure: count_with_drill {

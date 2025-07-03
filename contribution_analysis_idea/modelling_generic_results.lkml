@@ -193,4 +193,22 @@ from formatted_results
   dimension: included_dimensions {}
 
 }
-explore: generic_results_table {}
+explore: generic_results_table {
+
+}
+
+
+view: analysis_results {
+  extends: [generic_results_table]
+  derived_table: {
+    sql:
+{% assign original_sql = "${EXTENDED}" %}
+{% assign updated_sql = original_sql | replace: 'thekitchentable.kevmccarthy_sandbox_dataset.dynamic_insights_test', '`thekitchentable.rbobrowski_sandbox.ca_results`' %}
+{{ updated_sql }}
+    ;;
+  }
+}
+explore: analysis_results {
+  from: analysis_results
+  view_name: generic_results_table
+}

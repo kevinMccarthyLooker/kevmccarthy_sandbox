@@ -744,10 +744,23 @@ view: order_itmes_custom_html_examples_202506 {
 </div>
 </div>
  ;;
+  }
+  dimension: sale_price_dim_with_tooltip {
+    sql: ${TABLE}.sale_price ;;
+    html:<div data-toggle="tooltip" data-placement="top" title="The Sale Price is: {{value}}">{{rendered_value }} (see tooltip)</div>;;
+  }
+  measure: numbcer_of_order_items {type:count}
+  measure: total_value_with_tooltip_for_table {
+    type: sum
+    sql: ${sale_price} ;;
 
+    html:<div data-toggle="tooltip" data-placement="top" title="The total Sale Price for {{numbcer_of_order_items._value}} sales is: {{rendered_value}}">{{rendered_value }} (see tooltip)</div>;;
 
   }
 
 }
 
 explore: order_itmes_custom_html_examples_202506 {}
+
+
+include: "/comparison_analysis.dashboard.lookml"

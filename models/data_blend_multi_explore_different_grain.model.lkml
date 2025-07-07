@@ -17,14 +17,11 @@ view: +order_items {
 }
 # add a distinctness based measure
 view: +users {
-
-
   #can't really use count_distinct directly, cause it's not summmable
   measure: count_distinct_users {
     type: count_distinct
     sql: ${id} ;;
   }
-
 ##
 # Count distinct handling with hll, approach 1: init in the source table
   # sql_table_name: (select *, hll_count.init(id) as count_distinct_users__hll_init from `kevmccarthy.thelook_with_orders_km.users` group by all) ;; #this might be one way... but starting the hll init and grouping by all at the base table seems bad

@@ -59,3 +59,7 @@ application: simple_extension_km {
     standalone: yes
   }
 }
+
+# local_dependency:  {
+#   project: "kevmccarthy_project_for_local_import_testing"
+# }

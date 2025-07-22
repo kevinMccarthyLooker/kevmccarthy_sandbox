@@ -21,6 +21,7 @@ view: base_for_ndt_change_test {
   dimension: id {primary_key:yes}
   dimension: value {type:number}
   dimension_group: a_timestamp {datatype:timestamp type:time timeframes:[raw,time,minute,date] }
+  dimension: new_field {}
   measure: total_value {type:sum sql:${value};;}
 }
 
@@ -35,6 +36,7 @@ view: test_ndt_where_we_will_manually_delete_rows_and_columns_between_build {
       column: id {}
       column: total_value {}
       column: a_timestamp_minute {}
+      column: new_field {}
     }
     # persist_for: "2 minutes"
     # sql_trigger_value: select floor(extract(minute from current_timestamp())/2)*2,TIMESTAMP_TRUNC(current_timestamp(), MINUTE)  ;;

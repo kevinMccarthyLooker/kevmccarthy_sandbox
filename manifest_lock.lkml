@@ -6,3 +6,8 @@ remote_dependency: km_api_explorer_remote_repo {
   url: "https://github.com/kevinMccarthyLooker/km_api_explorer_repo.git"
   ref: "34c00bb92cb117b67a53fff369531b475703453b"
 }
+
+remote_dependency: km_api_explorer_remote_repo2 {
+  url: "https://github.com/kevinMccarthyLooker/km_api_explorer_repo.git"
+  ref: "master"
+}

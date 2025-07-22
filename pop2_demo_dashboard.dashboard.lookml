@@ -1,10 +1,12 @@
 ---
 - dashboard: pop_blog_lookml_config_20250402
   title: POP Blog LookML Config 20250402
-  layout: newspaper
+  # layout: newspaper
+  layout: static
   preferred_viewer: dashboards-next
   description: ''
   preferred_slug: dyhZ8laEHYQw6rn3XUXiwF
+  tile_size: 20
   elements:
   - title: Last Month Year over Year, with dates included for reference
     name: Last Month Year over Year, with dates included for reference
@@ -99,10 +101,12 @@
     hidden_pivots: {}
     defaults_version: 1
     listen: {}
-    row: 0
-    col: 0
-    width: 5
-    height: 17
+    # row: 0
+    # col: 0
+    # width: 5
+    # height: 17
+    top: 0
+    left: 0
   - title: New Tile
     name: New Tile
     model: pop2_demo_dashboard
@@ -172,7 +176,12 @@
     hidden_pivots: {}
     defaults_version: 1
     listen: {}
-    row: 0
-    col: 5
-    width: 19
-    height: 17
+    # row: 0
+    # col: 5
+    # width: 19
+    # height: 17
+    top: 1
+    left: 1
+
+
+

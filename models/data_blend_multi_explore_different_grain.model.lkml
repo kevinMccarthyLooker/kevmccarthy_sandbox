@@ -60,12 +60,16 @@
 # - - - Instead, we therefore propose using Hyperloglog features of BigQuery.  it CAN let us re-aggregate and achieve close approximation of distinct counts. Not ideal but assuming it is acceptable to users it will allow or to achive our goal of reasonable performance
 
     connection: "kevmccarthy_bq"
-    datagroup: marketplace_projects_standard_build_trigger { # We should try to establish a single common trigger criteria...
-      sql_trigger: select current_date() ;; # need a query with one cell result where value changes exactly when we want to trigger.  If midnight is not the ideal time, This could check an etl table, or sql could be adjust such that the result value changes at exactly a certain time in the day (e.g. something like select date_trunc(timestamp_sub(current_timestamp(), interval 2 hours), day) ... to cause trigger at 2:00 am)
-    }
+    # datagroup: marketplace_projects_standard_build_trigger { # We should try to establish a single common trigger criteria...
+    #   sql_trigger: select current_date() ;; # need a query with one cell result where value changes exactly when we want to trigger.  If midnight is not the ideal time, This could check an etl table, or sql could be adjust such that the result value changes at exactly a certain time in the day (e.g. something like select date_trunc(timestamp_sub(current_timestamp(), interval 2 hours), day) ... to cause trigger at 2:00 am)
+    # }
     # - A principle/goal is to minimize processing and we have established that nightly batch processing will be sufficient across the entire initiative (ie current day data is not required).  We should not initiate more builds or bypass available cached results if we don't need to.
     # - Using a single datagroup has the benefit that Looker will automatically manage build order based on dependencies of one build on other builds within a datagroup
-    persist_with: marketplace_projects_standard_build_trigger # use our common trigger for optimal cache usage: result gauranteed to be same since tables won't have been updated since the last build trigger anyway
+
+    #disabled persist as I was having trouble with pdt rebuilds
+    # persist_with: marketplace_projects_standard_build_trigger # use our common trigger for optimal cache usage: result gauranteed to be same since tables won't have been updated since the last build trigger anyway
+
+
     #   access_grant: identifier #access_grants outside scope of current demo, but we may utilize access grants to control field or explore level access based on user type (user attribute values)
 
 ###
@@ -212,16 +216,16 @@ view: events_data {
       # (metrics_with_denominator_1) 'Items Per Event'... can't be built here for two resasons: source explore doesn't have Event, and also because we need to apply division after aggregating numerator and denominator separately
     }
 
-    publish_as_db_view: yes # Facilitates subsequent sql queries that need to query the table (so that table exists even while it's being rebuild, the actual phyiscal rebuild involves creating a new physical name each time. Without this param we can't know the exact location of the current table other than getting it from looker ${[PDT].SQL_TABLE_NAME} reference in LookML)
+    # publish_as_db_view: yes # Facilitates subsequent sql queries that need to query the table (so that table exists even while it's being rebuild, the actual phyiscal rebuild involves creating a new physical name each time. Without this param we can't know the exact location of the current table other than getting it from looker ${[PDT].SQL_TABLE_NAME} reference in LookML)
 
     # Below are physicalization parameters relating to minimizing build query costs while meeting requirements (or missing important updates to historical data).  Note that, for example if source's queries are gaurnateed to be insignificant, it may be simpler and thus worthwhile to not persist, or not try to increment_keys.
-    datagroup_trigger: marketplace_projects_standard_build_trigger # control rebuild frequency.  see related comments in marketplace_projects_standard_build_trigger declaration
+    # datagroup_trigger: marketplace_projects_standard_build_trigger # control rebuild frequency.  see related comments in marketplace_projects_standard_build_trigger declaration
 
-    increment_key: "date_date" # Increment Key is used in conjuntion with increment_offset to avoid superflous re-building of previously persisted results.
+    # increment_key: "date_date" # Increment Key is used in conjuntion with increment_offset to avoid superflous re-building of previously persisted results.
     # - The value must be a time column included in the explore_source declaration, AND the source datasets / queries looker generates on for that explore_source must be optimzed for filtration on that particular date field (otherwise build queries will not really benefit from incrementing).
     # - - To be more specific for bigquery: ensure the source table is actually partitioned on the date field you use
     # - - Considering that we'll have singular general date in the final datasets: when we use increment_key in this initiative it should almost always be "date_date" (or time_period_date if that's what we end up calling it)
-    increment_offset: 2 # specify # of days that should be rebuilt (ideally the minimum required to meet requirements to save build compute/cost)
+    # increment_offset: 2 # specify # of days that should be rebuilt (ideally the minimum required to meet requirements to save build compute/cost)
     # - Ideal increment_offset number depends on the nature of the source data:
     # - - Sometimes (e.g. when upstream processes gauranteed that data older than [some_number] hours/days ago cannot have changed, or there's a specific standar of [some_number] of history that needs restatement), you'll set increment_offset equal to that [some_number] to capture the all available changes but not scan any more data than necessary.  Meli mentioned 45 day for certain explores? For explore_sources where all data is append only, I believe in theory an optimal setup could offset only 1, but to provide resilience against some timing issues I suspect it may worthwhile to rebuild 2 days anyway cause of relatively little cost in that case.)
     # - - Sometimes (e.g. when data CAN change indefintely e.g. with slowly changing dimensions and late arriving data)... Choosing offset is a balnce of cost vs business relevance of capturing updates that happened to data further in history.
@@ -231,8 +235,8 @@ view: events_data {
     # - Note that applying parameters below likely adds some (relative minor) cost to build (some added complexity and some additional compute and storage for usage for metadata)...
     # - - Therefore, if the queries we will run on this source don't achieve significant benefits due to these settings (which would be mainly because they filter on these fields), then applying these settings is not good
 # - - Still thinking (7/9): Will end user queries actually hit these tables directly?... or will we apply another layer of physicalization on top of these (persisting the subsequent union step)? If not user facing and therefore applying filtration and if not filtering due to incremental logic in downstream builds, then likely not helpful/good to add partitioning/clustering
-    partition_keys: ["date_date"] # similar to increment key above, the singular primary/general date field, at the date granularity (possibly named time_period_date) will almost always be right partition_key (where table size and expected filtration warrants partitioning)
-    cluster_keys: ["user_country"] # Include fields other than partition_key that are always/very likely to be filtered on (e.g for row_level security, field(s) that are filtered by default, or fields where filtering will be mandatory / enforced e.g. with sql_always_where in the actual usage). The order of cluster_keys matters (-> NO benefit if the first key listed is not filtered, even if other keys are).
+    # partition_keys: ["date_date"] # similar to increment key above, the singular primary/general date field, at the date granularity (possibly named time_period_date) will almost always be right partition_key (where table size and expected filtration warrants partitioning)
+    # cluster_keys: ["user_country"] # Include fields other than partition_key that are always/very likely to be filtered on (e.g for row_level security, field(s) that are filtered by default, or fields where filtering will be mandatory / enforced e.g. with sql_always_where in the actual usage). The order of cluster_keys matters (-> NO benefit if the first key listed is not filtered, even if other keys are).
   }
 }
 
@@ -257,13 +261,13 @@ view: order_items_data {
       derived_column: count_distinct_users_hll {sql:cast(null as BYTES);;} # placholder for metrics that con't come from this explore
     }
 
-    datagroup_trigger: marketplace_projects_standard_build_trigger # Whenever persisting, want to consistently use same datagroup if possible for this initiative
+    # datagroup_trigger: marketplace_projects_standard_build_trigger # Whenever persisting, want to consistently use same datagroup if possible for this initiative
 # - The value must be a time column included in the explore_source declarationn... doesn't make sense to increment on the typical date_date.. not obvious what will be optimal in this case as it's hard to expect that we'll be dealing with large dataets warranting icremental loads when we only have monthly granularity
 # - Minor(?) open question (7/9) (relates to niche DATE_1 - date grain not availble challenge, e.g. for plan data) what should increment key be if we don't even have date grain?... probably assess on a case by case basis cause that will be rare, and in that case maybe it's small data such that increment_key is not beneficial... for such datasets we should check if we should rebuild entirely instead of incrementing, or if we should even rebuild at all or run directly against source
-    increment_key: "date_month"
-    increment_offset: 2
-    partition_keys: ["date_month"]
-    cluster_keys: ["user_country"]
+    # increment_key: "date_month"
+    # increment_offset: 2
+    # partition_keys: ["date_month"]
+    # cluster_keys: ["user_country"]
   }
   # Note: Fields could be defined here and could be beneficial, for example for testing and troubleshooting purposes.  But we do not currently plan to use this view directly in an end user explore - it is primarily to drive management of a physical pre-aggregated dataset which will be used by other views.
 }
@@ -295,9 +299,9 @@ view: mockup_of_view_requiring_paramterization_data__daily {
         value: "date"
       }
     }
-    datagroup_trigger: marketplace_projects_standard_build_trigger
-    partition_keys: ["date_date"]
-    cluster_keys: ["user_country"]
+    # datagroup_trigger: marketplace_projects_standard_build_trigger
+    # partition_keys: ["date_date"]
+    # cluster_keys: ["user_country"]
   # Note: Fields could be defined here and could be beneficial, for example for testing and troubleshooting purposes.  But we do not currently plan to use this view directly in an end user explore - it is primarily to drive management of a physical pre-aggregated dataset which will be used by other views.
   }
 }
@@ -320,13 +324,13 @@ union all
 select timestamp(date_date),timestamp(date_month),user_country,cast(null as string) as order_status,cast(null as string) as event_browser,cast(null as Int64) as order_items_count,cast(null as Int64) as events_count,cast(null as BYTES) as count_distinct_users_hll, total_new_users_count from ${mockup_of_view_requiring_paramterization_data__daily.SQL_TABLE_NAME}
 
     ;;
-    datagroup_trigger: marketplace_projects_standard_build_trigger
-    increment_key: "date_date"
-    increment_offset: 45 # It seems to ensure relevant updates are captured from each source, increment settings would need to reflect the maximum required increment from all different sources.  If that proves too inneficient/costly, we can likely replicate the incremental build with sql_create or create_process (https://cloud.google.com/looker/docs/reference/param-view-create-process)
+    # datagroup_trigger: marketplace_projects_standard_build_trigger
+    # increment_key: "date_date"
+    # increment_offset: 45 # It seems to ensure relevant updates are captured from each source, increment settings would need to reflect the maximum required increment from all different sources.  If that proves too inneficient/costly, we can likely replicate the incremental build with sql_create or create_process (https://cloud.google.com/looker/docs/reference/param-view-create-process)
 
     # End user queries against this table (of which there may be many, unlike tables built in step 2) the will be hitting this table and will benefit from filters appled on partitioned or clustered fields
-    partition_keys: ["date_date"]
-    cluster_keys: ["user_country"]
+    # partition_keys: ["date_date"]
+    # cluster_keys: ["user_country"]
   }
 
 ###
@@ -381,17 +385,17 @@ explore: blended_data {
   # aggregate tables can be used to further prepare physical datatables Looker can use to complete end user queries.  When aggregate tables are define in a looker explore, looker will build them, and then try to use them if-and-only-if they can.
   # - Aggregate tables build with similar scheduling to the derived tables.
   # - Generally, aggregate tables must match an exact query you expect to be run later, or must be comprised of only re-aggregateable fields.  They can make queries much faster where applicable, but it is not trivial to decide what tables are worth the maintenece to pre-define this way.
-  aggregate_table: date_and_country_only {
-    query: {
-      dimensions: [date_date,user_country] # some subset of dimensions
-      measures: [total_order_items_count] # some subset of measures
-    }
-    materialization: { # seems materiization would match materialization settings of our blended source table
-      datagroup_trigger: marketplace_projects_standard_build_trigger
-      increment_key: "date_date"
-      increment_offset: 45 #
-      partition_keys: ["date_date"]
-      cluster_keys: ["user_country"]
-    }
-  }
+  # aggregate_table: date_and_country_only {
+  #   query: {
+  #     dimensions: [date_date,user_country] # some subset of dimensions
+  #     measures: [total_order_items_count] # some subset of measures
+  #   }
+  #   materialization: { # seems materiization would match materialization settings of our blended source table
+  #     datagroup_trigger: marketplace_projects_standard_build_trigger
+  #     increment_key: "date_date"
+  #     increment_offset: 45 #
+  #     partition_keys: ["date_date"]
+  #     cluster_keys: ["user_country"]
+  #   }
+  # }
 }

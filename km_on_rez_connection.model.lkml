@@ -6,15 +6,15 @@ datagroup: every_5_on_rez {
 view: base_for_ndt_change_test {
   derived_table: {
     sql:
-    select 'a' as source, 'a1' as id, 1 as value, timestamp_add(current_timestamp(),interval -0 MINUTE) as a_timestamp  --later will add a 'color'
+    select 2 as new_field, 'a' as source, 'a1' as id, 1 as value, timestamp_add(current_timestamp(),interval -0 MINUTE) as a_timestamp  --later will add a 'color'
     union all
-    select 'a' as source, 'a2' as id, 2 as value, timestamp_add(current_timestamp(),interval -10 MINUTE) as a_timestamp --later will add a 'color'
+    select 2 as new_field,'a' as source, 'a2' as id, 2 as value, timestamp_add(current_timestamp(),interval -10 MINUTE) as a_timestamp --later will add a 'color'
     union all
-    select 'b' as source, 'b3' as id, 3 as value, timestamp_add(current_timestamp(),interval -5 MINUTE) as a_timestamp --later will add a 'color'
+    select 2 as new_field,'b' as source, 'b3' as id, 3 as value, timestamp_add(current_timestamp(),interval -5 MINUTE) as a_timestamp --later will add a 'color'
     union all
-    select 'c' as source, 'c4' as id, 4 as value, timestamp_add(current_timestamp(),interval -1 MINUTE) as a_timestamp --later will add a 'color'
+    select 2 as new_field,'c' as source, 'c4' as id, 4 as value, timestamp_add(current_timestamp(),interval -1 MINUTE) as a_timestamp --later will add a 'color'
     union all
-    select 'd' as source, 'c5' as id, 5 as value, timestamp_add(current_timestamp(),interval -1 MINUTE) as a_timestamp --later will add a 'color'
+    select 3 as new_field,'d' as source, 'c5' as id, 5 as value, timestamp_add(current_timestamp(),interval -1 MINUTE) as a_timestamp --later will add a 'color'
     ;;
   }
   dimension: source {}
@@ -46,6 +46,7 @@ view: test_ndt_where_we_will_manually_delete_rows_and_columns_between_build {
   dimension: id {primary_key:yes}
   dimension: total_value {}
   dimension: a_timestamp_minute {}
+  dimension: new_field {}
 
 }
 explore: test_ndt_where_we_will_manually_delete_rows_and_columns_between_build {}

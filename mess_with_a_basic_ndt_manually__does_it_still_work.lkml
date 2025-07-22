@@ -1,3 +1,7 @@
+datagroup: EVERY_5_MINS {
+  sql_trigger:select floor(extract(minute from current_timestamp())/5)*5,TIMESTAMP_TRUNC(current_timestamp(), MINUTE)  ;;
+
+}
 view: base_for_ndt_change_test {
   derived_table: {
     sql:
@@ -19,7 +23,9 @@ view: base_for_ndt_change_test {
   measure: total_value {type:sum sql:${value};;}
 }
 
-explore: base_for_ndt_change_test {}
+explore: base_for_ndt_change_test {
+  persist_with: EVERY_5_MINS
+}
 
 view: test_ndt_where_we_will_manually_delete_rows_and_columns_between_build {
   derived_table: {
@@ -30,7 +36,8 @@ view: test_ndt_where_we_will_manually_delete_rows_and_columns_between_build {
       column: a_timestamp_minute {}
     }
     # persist_for: "2 minutes"
-    sql_trigger_value: select floor(extract(minute from current_timestamp())/2)*2,TIMESTAMP_TRUNC(current_timestamp(), MINUTE)  ;;
+    # sql_trigger_value: select floor(extract(minute from current_timestamp())/2)*2,TIMESTAMP_TRUNC(current_timestamp(), MINUTE)  ;;
+    datagroup_trigger: EVERY_5_MINS
     increment_key: "a_timestamp_minute"
     increment_offset: 1
   }

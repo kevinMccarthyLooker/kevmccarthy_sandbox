@@ -764,3 +764,7 @@ explore: order_itmes_custom_html_examples_202506 {}
 
 
 include: "/comparison_analysis.dashboard.lookml"
+
+
+
+include: "/mess_with_a_basic_ndt_manually__does_it_still_work"

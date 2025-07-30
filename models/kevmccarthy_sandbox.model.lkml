@@ -768,3 +768,5 @@ include: "/comparison_analysis.dashboard.lookml"
 
 
 include: "/mess_with_a_basic_ndt_manually__does_it_still_work"
+
+include: "/agg_awareness_with_ratio_of_sums.lkml"

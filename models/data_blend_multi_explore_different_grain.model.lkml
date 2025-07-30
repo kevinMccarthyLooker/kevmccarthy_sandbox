@@ -380,6 +380,7 @@ select timestamp(date_date),timestamp(date_month),user_country,cast(null as stri
 # Final End user facting explore(s)
 
 explore: blended_data {
+  # fields: [ALL_FIELDS*,-view_to_hold_queries*]
   #  persist_with: datagroup-ref # could be used to set cache use policy on this explore - but we have already set at model level
 
   # aggregate tables can be used to further prepare physical datatables Looker can use to complete end user queries.  When aggregate tables are define in a looker explore, looker will build them, and then try to use them if-and-only-if they can.
@@ -398,4 +399,29 @@ explore: blended_data {
   #     cluster_keys: ["user_country"]
   #   }
   # }
+
+  # join: view_to_hold_queries {
+  #   sql:  ;;
+  #   relationship: one_to_one
+  #   required_access_grants: [test_access_grant]
+  # }
+
 }
+# view: view_to_hold_queries {
+
+#   query: a_query {
+
+#     label: "users query only visible to some "
+#     measures: [blended_data.total_events_count]
+#   }
+#   dimension: test {
+#     label: "email:{{ _user_attributes['email'] }}"
+#   }
+# }
+
+
+
+# access_grant: test_access_grant {
+#   user_attribute: email
+#   allowed_values: ["break-kevmccarthy@google.com"]
+# }

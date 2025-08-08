@@ -770,3 +770,23 @@ include: "/comparison_analysis.dashboard.lookml"
 include: "/mess_with_a_basic_ndt_manually__does_it_still_work"
 
 include: "/agg_awareness_with_ratio_of_sums.lkml"
+
+
+
+
+
+view: +orders {
+  measure: basic_count {type:count}
+  measure: sum_example {type:sum sql:1/*note*/;;}
+}
+
+explore: sym_agg_example {
+  extends: [order_items]
+  view_name:order_items
+
+}
+
+explore: orders_example {
+  from: orders
+  view_name: orders
+  }

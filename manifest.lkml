@@ -63,3 +63,49 @@ application: simple_extension_km {
 # local_dependency:  {
 #   project: "kevmccarthy_project_for_local_import_testing"
 # }
+
+constant: newline {
+  value: "
+    "
+}
+
+#a specific set of view names are harcoded into this. not sure how to make it more dynamic
+constant: blended_field_sql_lookup {
+  value: "
+{%- assign field_name = _field._name | split: '.' | last -%}
+{%- assign final_sql = '' -%}
+{%- for i in (1..5) -%}
+  {%- if i == 1 -%} {%- assign a_view = order_items_data -%}
+  {%- elsif i == 2 -%} {%- assign a_view = events_data -%}
+  {%- else -%}{%- break -%}
+  {%- endif -%}
+  {%- assign final_sql = final_sql | append: '@{newline}  ,/* from ' | append: a_view._name | append: '-> */' -%}
+  {%- if  a_view[field_name]._sql -%}{%- assign final_sql = final_sql | append: a_view[field_name]._sql -%}
+  {%- else                        -%}{%- assign final_sql = final_sql | append: 'null /* ' | append: field_name | append: ' declaration not found in ' | append: a_view._name | append: ' */' -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign final_sql = final_sql | prepend: 'coalesce(null' | append: '@{newline})' -%}
+{{- final_sql -}}
+  "
+}
+constant: blended_field_sql_lookup__alternate_string_label_for_nulls {
+  value: "
+  {%- assign field_name = _field._name | split: '.' | last -%}
+  {%- assign final_sql = '' -%}
+  {%- for i in (1..5) -%}
+  {%- if i == 1 -%} {%- assign a_view = order_items_data -%}
+  {%- elsif i == 2 -%} {%- assign a_view = events_data -%}
+  {%- else -%}{%- break -%}
+  {%- endif -%}
+  {%- assign final_sql = final_sql | append: '@{newline}  ,/* from ' | append: a_view._name | append: '-> */' -%}
+  {%- if  a_view[field_name]._sql -%}{%- assign final_sql = final_sql | append: a_view[field_name]._sql -%}
+  {%- else                        -%}{%- assign final_sql = final_sql | append: \"'NA for Metrics from \" | append: a_view._name | append: \"' /* \" | append: field_name | append: ' declaration not found in ' | append: a_view._name | append: ' */' -%}
+  {%- endif -%}
+  {%- endfor -%}
+  {%- assign final_sql = final_sql | prepend: 'coalesce(null' | append: '@{newline})' -%}
+  {{- final_sql -}}
+  "
+}
+constant: blend_special_source_table_basic_column_reference {
+  value: "{% if  view__is_in_query._sql=='true' %}{{_field._name}}{%else%}null/*sql replaced with null because the view {{_view._name}} is not required by the query (e.g. no metrics)*/{%endif%}"
+}

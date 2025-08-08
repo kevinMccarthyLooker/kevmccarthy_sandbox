@@ -3,6 +3,13 @@
 # updating to use structs and looker views...
 
 connection: "kevmccarthy_bq"
+datagroup: marketplace_projects_standard_build_trigger {
+  # We should try to establish a single common trigger criteria...
+  sql_trigger: select current_date() ;; # need a query with one cell result where value changes exactly when we want to trigger.  If midnight is not the ideal time, This could check an etl table, or sql could be adjust such that the result value changes at exactly a certain time in the day (e.g. something like select date_trunc(timestamp_sub(current_timestamp(), interval 2 hours), day) ... to cause trigger at 2:00 am)
+}
+#     # - A principle/goal is to minimize processing and we have established that nightly batch processing will be sufficient across the entire initiative (ie current day data is not required).  We should not initiate more builds or bypass available cached results if we don't need to.
+#     # - Using a single datagroup has the benefit that Looker will automatically manage build order based on dependencies of one build on other builds within a datagroup
+
 
 ## Below are basic/pre-existing foundational view definitions.  These are basically the minimal code versions of auto-generated lookml we'll get typically from source tables, and these views represent views defined elsewhere in Meli project irrespective of this intiiative.
 view: users {
@@ -69,7 +76,10 @@ explore: events {
 }
 
 view: events_data {
+  #hide basic dimensions?  There could be a way to make them visible during development/troublshooting specifically
   fields_hidden_by_default: yes
+  #something that has to be set manually for consistent reference.
+  dimension: view__is_in_query {sql:{{events_data._in_query}};;}
   derived_table: {
     # Note: Explore source must be an existing explore in this model.  If source explores exist in other models, we should consider options and their implications, such as:
     # - Establish these PDTs in the respective source models and/or use project import to port the logic to the new target model.
@@ -88,17 +98,25 @@ view: events_data {
 
       column: count {field:events.count}
     }
+    datagroup_trigger: marketplace_projects_standard_build_trigger
+#     datagroup: marketplace_projects_standard_build_trigger { # We should try to establish a single common trigger criteria...
+# #     #   sql_trigger: select current_date() ;; # need a query with one cell result where value changes exactly when we want to trigger.  If midnight is not the ideal time, This could check an etl table, or sql could be adjust such that the result value changes at exactly a certain time in the day (e.g. something like select date_trunc(timestamp_sub(current_timestamp(), interval 2 hours), day) ... to cause trigger at 2:00 am)
+# #     # }
+    partition_keys: ["date_date"]
   }
   dimension: source {sql:${TABLE}.source;;}
   dimension: date_date {type:date}
   dimension: date_month {type:date_month}
   dimension: country {}
   dimension: age {}
-  dimension: browser {}
+  dimension: browser {sql:@{blend_special_source_table_basic_column_reference};;}
   dimension: count {}
 
   #unhide measures
-  measure: total_events_count {hidden:no type: sum sql: ${count} ;;}
+  measure: total_events_count {hidden:no
+    type: sum
+    sql: ${count}),0) * nullif(sum(${count}),0) / nullif(sum(${count};;
+  }
 }
 
 
@@ -113,11 +131,19 @@ view: events_data {
 # }
 
 # Note - parameters and considerations explained in similar steps above are not repeated
+# view: for_extension {
+
+# }
 view: order_items_data {
+  fields_hidden_by_default: yes
+
+  dimension: view__is_in_query {sql:{{order_items_data._in_query}};;}
+  # extends: [for_extension]
   derived_table: {
     explore_source: order_items {
 
       # derived_column: date_date                 {sql: cast(null as timestamp) ;;}       # (DATE_1) source doesn't have date level detail so we explicitly push null.  avoid type clash in subsequent union by casting missing/null fields to match to existing datatype from other sources.
+      derived_column: date_date                 {sql: date_month ;;}       # (DATE_1) source doesn't have date level detail so we explicitly push null.  avoid type clash in subsequent union by casting missing/null fields to match to existing datatype from other sources.
       column:         date_month                {field:order_items.created_at_month}
 
       column:         country              {field:users.country}
@@ -127,27 +153,159 @@ view: order_items_data {
 
       column:         count         {field: order_items.count}
     }
+    datagroup_trigger: marketplace_projects_standard_build_trigger
+    partition_keys: ["date_date"]
   }
   dimension: source {sql:${TABLE}.source;;}
   # dimension: date_date {type:date} #purposefully don't have this dimension
   dimension: date_month {type:date_month}
   dimension: country {}
-  dimension: age {}
-  dimension: status {}
+  dimension: age {type:number}
+  dimension: status {sql:@{blend_special_source_table_basic_column_reference};;}
+
+  # dimension: status {sql:{% if  view__is_in_query._sql=='true' %}{{_field._name}}{%else%}null/*sql replaced with null because the view {{_view._name}} is not required by the query (e.g. no metrics)*/{%endif%};;}
+
+
   dimension: count {}
 
   #unhide measures
-  measure: total_order_items_count {hidden:no type: sum sql: ${count} ;;}
+  measure: total_order_items_count {hidden:no
+    type: sum
+    # sql: ${count} ;;
 
+    #goal: avoid colaescing sums to 0
+    sql: ${count}),0) * nullif(sum(${count}),0) / nullif(sum(${count};;
+  }
+  # measure: total_order_items_count_regular {
+  #   type: sum
+  #   sql: ${count};;
+  # }
+
+  measure: row_count {group_label:"troubleshooting" type:count}
 }
 
 
 
 
-###
-# Step 3: Co-locate/align/blend the data from different sources, building upon the datasets prepared in Step 2, using a sql union.
-# 8/1: Updating final union to be dynamic and not persisted
+
 view: blended_data {
+
+   #We should be able to avoid having one specific starting table.  This is a minmal starting table with no impact
+  #   sql: (select null limit 0) ;;}
+
+  #We'll generate a union of different datasets.  We will keep data in separate structs, so we can reference them like tables and so we can manage union syntax.
+  #We want core date fields and other fields we need to optimize for in the main/initial part of the union.  Note for example that we don't get benefit of partitions if dates have been coalesced, we do if they are unioned
+  # sql_table_name:(select null as source, null as date_date,null as events_data, null as order_items_data from (select null) ;;
+
+  # We may have different 'versions' of the data to display (e.g. for period over period), so have a layer at that level as well.
+
+  sql_table_name:
+(select * from
+(
+
+--Source, Version, Key Date Field, [other key fields present everywhere] , [series of structs for source, version etc]
+{% assign source_names = "events_data" | split: ";" %}
+{% assign order_items_data_source_name = "order_items_data" | split: ";" %}
+--sourcenames:{{source_names}}
+{% assign source_namesv2 = source_names | concat: order_items_data_source_name | join:',' |append:','%}
+--source_namesv2:{{source_namesv2}}
+{% assign source_namesv3 = source_namesv2 | replace: ',','_yoy,'%}
+--source_namesv3:{{source_namesv3}}
+{% assign source_namesv4 = source_namesv2 | append: source_namesv3 %}
+--source_namesv4:{{source_namesv4}}
+{% assign source_names_final = source_namesv4 %}
+--source_names_final:{{source_names_final}}
+{% assign final_array = source_names_final | split: ',' %}
+--final_array{{final_array}}
+--primary sources:
+
+{% assign empty_structs_sql = '' %}
+{% for source_name in final_array %}
+  {% assign empty_structs_sql = empty_structs_sql | append: 'null as ' | append: source_name | append:', ' %}
+{% endfor %}
+
+{% assign full_union_schema ='select string(null) as source, date(null) as date_date, ' | append: empty_structs_sql | append:' from (select null)' %}
+--full_union_schema{{full_union_schema}}
+{%- assign source_sql = '' %}
+{% assign source_sql = source_sql | append: full_union_schema %}
+
+--source_sql log1--
+/*
+{{source_sql}}
+*/
+{% if events_data._in_query %}
+{% assign source_to_process = 'events_data,' %}
+{% assign replacements_sql = 'null as ' | append: source_to_process %}
+{% assign this_source_sql = "
+union all select '"
+  | append: source_to_process | append: "' as source, date(date_date) as date_date, " | append: empty_structs_sql | replace: replacements_sql, source_to_process  %}
+{% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+{% assign this_source_sql = this_source_sql | append: 'from ${events_data.SQL_TABLE_NAME} as ' | append:  source_to_process |append:'
+  '%}
+
+{%comment%} remove final comma {% endcomment %}
+{% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+{% endif %}
+
+{% assign source_sql = source_sql | append: this_source_sql %}
+{% if order_items_data._in_query %}
+  {% assign source_to_process = 'order_items_data,' %}
+  {% assign replacements_sql = 'null as ' | append: source_to_process %}
+  {% assign this_source_sql = "
+union all select 'order_items_data' as source, date(date_date) as date_date," | append: empty_structs_sql  | replace: replacements_sql, source_to_process  %}
+  {% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+  {% assign this_source_sql = this_source_sql | append: 'from ${order_items_data.SQL_TABLE_NAME} as ' | append:  source_to_process %}
+  {% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+{% endif %}
+{% assign source_sql = source_sql | append: this_source_sql %}
+
+{% if events_data_yoy._in_query %}
+  {% assign source_to_process = 'events_data_yoy,' %}
+  {% assign replacements_sql = 'null as ' | append: source_to_process %}
+  {% assign this_source_sql = "
+union all select 'events_data_yoy' as source, date_add(date(date_date), interval 1 YEAR) as date_date," | append: empty_structs_sql  | replace: replacements_sql, source_to_process  %}
+  {% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+  {% assign this_source_sql = this_source_sql | append: 'from ${events_data.SQL_TABLE_NAME} as ' | append:  source_to_process %}
+  {% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+{% endif %}
+{% assign source_sql = source_sql | append: this_source_sql %}
+
+{% if order_items_data_yoy._in_query %}
+  {% assign source_to_process = 'order_items_data_yoy,' %}
+  {% assign replacements_sql = 'null as ' | append: source_to_process %}
+  {% assign this_source_sql = "
+union all select 'order_items_data_yoy' as source, date_add(date(date_date), interval 1 YEAR) as date_date," | append: empty_structs_sql  | replace: replacements_sql, source_to_process  %}
+  {% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+  {% assign this_source_sql = this_source_sql | append: 'from ${order_items_data.SQL_TABLE_NAME} as ' | append:  source_to_process %}
+  {% assign this_source_sql = this_source_sql | split: '' | reverse | join:'' |remove_first:','|split:''|reverse|join:''%}
+{% endif %}
+
+{% assign source_sql = source_sql | append: this_source_sql %}
+{{source_sql}}
+
+----
+)
+
+  ;;
+  # events_data as events_data, null as order_items_data, null as events_yoy from ${events_data.SQL_TABLE_NAME}  as events_data
+  # string(null) as source,date(null) as date_date, null as events_data, null as order_items_data, null as events_yoy
+# (
+# --Source, Version, Key Date Field, [other key fields present everywhere] , [series of structs for source, version etc]
+#   select string(null) as source,date(null) as date_date, null as events_data, null as order_items_data from (select null)
+#   {% if events_data._in_query %}
+#   union all select 'events' as source, date(date_date), events_data as events_data, null as order_items_data from ${events_data.SQL_TABLE_NAME}  as events_data
+#   {% endif %}
+#   {% if order_items_data._in_query %}
+#   union all select 'events' as source, date(date_date), null as events_data, order_items_data as order_items_data from ${order_items_data.SQL_TABLE_NAME}  as order_items_data
+#   {% endif %}
+# )
+
+
+
+
+
+
+
 #   derived_table: {
 #     # sql:
 #     # select
@@ -182,106 +340,181 @@ view: blended_data {
 
 #     ;;
 #   }
-derived_table: {
-  sql: (select null limit 0) ;;
-}
 
-  dimension: source {
 
-    sql: coalesce(
-      null
-      {%if events_data._in_query%}{{events_data.source._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-      {%if order_items_data._in_query%}{{order_items_data.source._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-      ) ;;
+
+  # sql_table_name:  (select null as source, null as date_date,null as events_data, null as order_items_data from (select null) ;;
+  # derived_table: {
+
+
+####
+# COALESCING
+# need to coalesce the corresponding dimensions from every source (which has that data)
+# using some advanced tricks here
+# # 1) (WIP..) Suggestions explore.  Otherwise these tricks cause no suggestions to be returned.  Naive handling could lead to huge suggestion queries.
+# # 2) By refering to the POTENTAL source field a respective view, we can fetch the relevant sql if it has been set, and if not set then we'll handle it logically and put a note in sql. avoids scanning data unnecessarily
+# # 3) Note: a related step (but taken the source view side) handles the case where there IS sql for the dimension in that view, but we didn't actually need the view because no measures were set
+
+  dimension: status {
+    suggest_explore: blended_data_suggestions suggest_dimension: status
+    # sql: @{blended_field_sql_lookup__alternate_string_label_for_nulls};;
+    sql: @{blended_field_sql_lookup};;
   }
+
+  dimension: source {sql: @{blended_field_sql_lookup};; }
 ###
 # Expose the data elements we have made available in the bended dataset.
+# This is the special partition field.
   dimension: date_date {
     group_label: "Dates"
     type:date
+    datatype: datetime
+    # sql: @{blended_field_sql_lookup};;
+    sql:date_date;;
   }
   dimension: date_month {
     group_label: "Dates"
     type:date_month
     # sql: coalesce(${events_blend.date_month::date},${order_items_blend.date_month::date}) ;;
-sql: coalesce(
-null
-{%if events_data._in_query%}{{events_data.date_month._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-{%if order_items_data._in_query%}{{order_items_data.date_month._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-) ;;
+# sql: coalesce(
+# null
+# {%if events_data._in_query%}{{events_data.date_month._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
+# {%if order_items_data._in_query%}{{order_items_data.date_month._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
+# ) ;;
+    sql: @{blended_field_sql_lookup};;
   }
 
-  dimension: user_country {
-sql: coalesce(
-null
-{%if events_data._in_query%}{{events_data.country._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-{%if order_items_data._in_query%}{{order_items_data.country._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-) ;;
+#This example shows a way we will simply check every source view for the presence of this particular dimenions
+  dimension: country {
+    # {% assign field_name = 'country'%}
+    # sql:
+    # {% assign field_name = _field._name | split: '.' | last %}
+    # {%assign final_sql = ''%}
+    # {% for i in (1..5) %}
+    # {% if i == 1 %} {% assign a_view = order_items_data %}
+    # {% elsif i == 2 %} {% assign a_view = events_data %}
+    # {% else %}{%break%}
+    # {% endif %}
+    # {% assign final_sql = final_sql | append: ',' | append: '/*(from:' | append: a_view._name | append: '-> */'| append: a_view[field_name]._sql %}
+    # {% endfor %}
+    # coalesce(null,{{final_sql}})
+    # ;;
+sql:
+{%- assign field_name = _field._name | split: '.' | last -%}
+{%- assign final_sql = '' -%}
+{%- for i in (1..5) -%}
+  {%- if i == 1 -%} {%- assign a_view = order_items_data -%}
+  {%- elsif i == 2 -%} {%- assign a_view = events_data -%}
+  {%- else -%}{%- break -%}
+  {%- endif -%}
+  {%- assign final_sql = final_sql | append: '@{newline}  ,/* from ' | append: a_view._name | append: '-> */' -%}
+  {%- if  a_view[field_name]._sql == '' -%}
+    {%- assign final_sql = final_sql | append: 'null /* ' | append: field_name | append: ' declaration not found in ' | append: a_view._name | append: ' */' -%}
+  {%- else -%}
+    {%- assign final_sql = final_sql | append: a_view[field_name]._sql -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign final_sql = final_sql | prepend: 'coalesce(null' | append: '@{newline})' -%}
+{{- final_sql -}};;
   }
 
   dimension: browser {
     description: "test - {{events_data.browser._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{{order_items_data.browser._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}"
-sql:
-coalesce(
-null
-{%if events_data._in_query%}{{events_data.browser._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-{%if order_items_data._in_query%}{{order_items_data.browser._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-) ;;
-  }
-  dimension: status {
-    suggest_explore: blended_data_suggestions suggest_dimension: status
+# sql:
+# coalesce(
+# null
+# {%if events_data._in_query%}{{events_data.browser._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
+# {%if order_items_data._in_query%}{{order_items_data.browser._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
+# ) ;;
     sql:
-    coalesce(
-    null
-    {%if events_data._in_query%}{{events_data.status._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-    {%if order_items_data._in_query%}{{order_items_data.status._sql | prepend:',' | append: '/**/' | replace: ',/**/','/*no field found*/' }}{%else%}/*view not _in_query based on required metrics*/{%endif%}
-    ) ;;
+    {%- assign field_name = _field._name | split: '.' | last -%}
+    {%- assign final_sql = '' -%}
+    {%- for i in (1..5) -%}
+    {%- if i == 1 -%} {%- assign a_view = order_items_data -%}
+    {%- elsif i == 2 -%} {%- assign a_view = events_data -%}
+    {%- else -%}{%- break -%}
+    {%- endif -%}
+    {%- assign final_sql = final_sql | append: '@{newline}  ,/* from ' | append: a_view._name | append: '-> */' -%}
+    {%- if  a_view[field_name]._sql -%}
+      {%- assign final_sql = final_sql | append: a_view[field_name]._sql -%}
+    {%- else -%}
+      {%- assign final_sql = final_sql | append: 'null /* ' | append: field_name | append: ' declaration not found in ' | append: a_view._name | append: ' */' -%}
+    {%- endif -%}
+    {%- endfor -%}
+    {%- assign final_sql = final_sql | prepend: 'coalesce(null' | append: '@{newline})' -%}
+    {{- final_sql -}};;
   }
-  #raw fields that will be re-aggregated into measures
-  # dimension: order_items_count {hidden:yes}
-  # dimension: events_count {hidden:yes sql:events.events_count;;}
-  # dimension: total_new_users_count {hidden:yes}
-
-  #measures
-  # measure: total_order_items_count {type: sum sql: ${order_items_count} ;;}
-  # measure: total_events_count {type: sum sql: ${events_count} ;;}
-  # measure: total_events_count {type: sum sql: ${events_count} ;;}
-
-  # measure: sum_total_new_users_count {type:sum sql:${total_new_users_count};;}
 
   #demo ratio between fields from different explores.
   measure: items_per_event {
     type: number
-    sql: ${order_items_data.total_order_items_count}/nullif(${events_data.total_events_count},0) ;;
-    value_format_name: decimal_2
-    # Note: Not currently in Scope/Focus of this demo, but we expect to develop support for special drill-paths in links or html
-    # link: {url:"/explore/events"}
-    # html: [custom presentation logic for rendering looker query results, custom drill links, etc] ;;
-  }
+  #   #use looker reference syntax to trigger looker to see those other views as required, and join/bring in data, etc
+    # sql: ((${order_items_data.total_order_items_count}
+    # --note
+    # )) /((${events_data.total_events_count}));;
 
-  dimension: count_distinct_users_hll {hidden:yes} # For clarity and troubleshooting for develoers, recommend defining dimensions for raw columns in blended source table, even those that are helper columns or should only be used as measures (which we'll define separately).  Should hide and should have naming conventions for such cases
+    sql: safe_divide(${order_items_data.total_order_items_count},${events_data.total_events_count}) ;;
 
-  measure: total_count_distinct_users_hll {
-    type: number
-    sql: hll_count.merge(${count_distinct_users_hll}) ;;
+    # /*test*/
+    # /nullif(${events_data.total_events_count},0) ;;
+    # sql: sum(1) ;;
+  #   value_format_name: decimal_2
+  #   # Note: Not currently in Scope/Focus of this demo, but we expect to develop support for special drill-paths in links or html
+  #   # link: {url:"/explore/events"}
+  #   # html: [custom presentation logic for rendering looker query results, custom drill links, etc] ;;
   }
 }
 
-###
-# Final End user facting explore(s)
+view: order_items_data_yoy {
+  extends: [order_items_data]
+  # sql_table_name: (${events_data.SQL_TABLE_NAME}) ;;
+  sql_table_name: ;; #don't want to re-persist the base sql
+}
+view: events_data_yoy {
+  extends: [events_data]
+  # sql_table_name: (${events_data.SQL_TABLE_NAME}) ;;
+  sql_table_name: ;; #don't want to re-persist the base sql
+}
 
+view: explore_params {
+  parameter: allow_future_data {type:yesno}
+}
+
+view: closing_paren {}
 explore: blended_data {
-  sql_table_name: /*test*/ ;;
+
+  sql_always_where:
+  --explore_params.allow_future_data:{{explore_params.allow_future_data._parameter_value}}--
+  {% if explore_params.allow_future_data._parameter_value == "true" %}1=1{%else%}${date_date} < current_date() {%endif%} ;;
+  join: explore_params {sql:  ;; relationship:one_to_one}
   join: events_data {
-    # sql:;;relationship:one_to_one
-    sql:full outer join (select 'events' as source,* from ${events_data.SQL_TABLE_NAME}) as events_data on false;;relationship:one_to_one
+    # sql:union all select 'events' as source, date_date,${events_data.SQL_TABLE_NAME} as events_data, null as order_items_data from ${events_data.SQL_TABLE_NAME} ;;relationship:one_to_one
+    sql:  ;; relationship:one_to_one
   }
   join: order_items_data {
-    # sql:;;relationship:one_to_one
-    sql:full outer join (select 'order_items' as source,* from ${order_items_data.SQL_TABLE_NAME}) as order_items_data on false;;relationship:one_to_one
+    # sql:union all select 'order_items' as source,date_date,null as events_data,${order_items_data.SQL_TABLE_NAME} as order_items_data from ${order_items_data.SQL_TABLE_NAME};;relationship:one_to_one
+    sql:  ;; relationship:one_to_one
   }
+  join: events_data_yoy {sql:  ;; relationship:one_to_one}
+  join: order_items_data_yoy {sql:  ;; relationship:one_to_one}
+
+
+
+  #keep this at end of explore definition. i
+  always_join: [closing_paren]
+  join: closing_paren {sql:)/*end union all*/ ;;relationship:one_to_one}
+
+  # join: yoy_data {
+  #   # sql:union all select 'order_items' as source,date_add(date_date, interval 1 year) as date_date,null as events_data,${order_items_data.SQL_TABLE_NAME} as order_items_data from ${order_items_data.SQL_TABLE_NAME};;relationship:one_to_one
+  #   sql: union all select 'yoy' source,date_add(date_date, interval 1 year) as date_date,events_data,order_items_data from blended_data ;;
+  # }
 }
 
+
+
+#####
+# Need to deal with suggestions
+#Suggestions##
 view: blended_data_suggestions {
   derived_table: {
     explore_source: blended_data {
@@ -293,6 +526,4 @@ view: blended_data_suggestions {
   }
   dimension: status {}
 }
-explore: blended_data_suggestions {
-
-}
+explore: blended_data_suggestions {}

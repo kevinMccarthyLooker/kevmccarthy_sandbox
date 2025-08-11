@@ -28,7 +28,7 @@ view: returned_items_by_returned_date {
       bind_filters: {from_field:combined_explore_parameters.date_filter to_field:order_items.returned_at_date}
     }
   }
-  dimension: returned_date {}
+  dimension: returned_date {type:date}
   dimension: returned_count {type:number hidden:yes}
   measure: total_returned_count {type:sum sql:${returned_count};;}
 }
@@ -40,7 +40,7 @@ view: shipped_items_by_shipped_date {
       bind_filters: {from_field:combined_explore_parameters.date_filter to_field:order_items.shipped_at_date}
     }
   }
-  dimension: shipped_date {}
+  dimension: shipped_date {type:date}
   dimension: shipped_count {type:number hidden:yes}
   measure: total_shipped_count {type:sum sql:${shipped_count};;}
 }

@@ -75,8 +75,12 @@ constant: blended_field_sql_lookup {
 {%- assign field_name = _field._name | split: '.' | last -%}
 {%- assign final_sql = '' -%}
 {%- for i in (1..5) -%}
-  {%- if i == 1 -%} {%- assign a_view = order_items_data -%}
-  {%- elsif i == 2 -%} {%- assign a_view = events_data -%}
+  {%- if i == 1 -%} {%- assign a_view = order_items_data_source -%}
+  {%- elsif i == 2 -%} {%- assign a_view = events_data_source -%}
+  {%- elsif i == 3 -%} {%- assign a_view = events_data_yoy -%}
+  {%- elsif i == 4 -%} {%- assign a_view = order_items_data_yoy -%}
+  {%- elsif i == 5 -%} {%- assign a_view = events_data_running_total -%}
+  {%- elsif i == 6 -%} {%- assign a_view = order_items_data_running_total -%}
   {%- else -%}{%- break -%}
   {%- endif -%}
   {%- assign final_sql = final_sql | append: '@{newline}  ,/* from ' | append: a_view._name | append: '-> */' -%}
@@ -93,8 +97,12 @@ constant: blended_field_sql_lookup__alternate_string_label_for_nulls {
   {%- assign field_name = _field._name | split: '.' | last -%}
   {%- assign final_sql = '' -%}
   {%- for i in (1..5) -%}
-  {%- if i == 1 -%} {%- assign a_view = order_items_data -%}
-  {%- elsif i == 2 -%} {%- assign a_view = events_data -%}
+  {%- if i == 1 -%} {%- assign a_view = order_items_data_source -%}
+  {%- elsif i == 2 -%} {%- assign a_view = events_data_source -%}
+  {%- elsif i == 3 -%} {%- assign a_view = events_data_yoy -%}
+  {%- elsif i == 4 -%} {%- assign a_view = order_items_data_yoy -%}
+  {%- elsif i == 5 -%} {%- assign a_view = events_data_running_total -%}
+  {%- elsif i == 6 -%} {%- assign a_view = order_items_data_running_total -%}
   {%- else -%}{%- break -%}
   {%- endif -%}
   {%- assign final_sql = final_sql | append: '@{newline}  ,/* from ' | append: a_view._name | append: '-> */' -%}

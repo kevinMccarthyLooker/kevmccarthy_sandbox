@@ -40,7 +40,14 @@ view: shipped_items_by_shipped_date {
       bind_filters: {from_field:combined_explore_parameters.date_filter to_field:order_items.shipped_at_date}
     }
   }
-  dimension: shipped_date {type:date}
+  # dimension: shipped_date {type:date}
+  dimension: shipped_date {type:date
+    # sql:(select timestamp('2025-08-02 00:00:00') a_time from unnest(generate_date_array('2025-01-01','2026-01-01', interval 1 day)) as a_single_row_table where {% condition shipped_date %}a_time{%endcondition%}limit 1)
+    # ;;
+  }
+  dimension: or_helper {
+
+  }
   dimension: shipped_count {type:number hidden:yes}
   measure: total_shipped_count {type:sum sql:${shipped_count};;}
 }
@@ -52,7 +59,8 @@ explore: shipped_and_returned_items {
   join: returned_items_by_returned_date {
     type: full_outer
     relationship: one_to_one
-    sql_on: ${shipped_and_returned_items.shipped_date}=${returned_items_by_returned_date.returned_date} ;;
+    # sql_on: ${shipped_and_returned_items.shipped_date}=${returned_items_by_returned_date.returned_date} ;;
+    sql_on: shipped_and_returned_items.shipped_date=returned_items_by_returned_date.returned_date ;;
   }
   join: combined_explore_parameters {
     sql:  ;;

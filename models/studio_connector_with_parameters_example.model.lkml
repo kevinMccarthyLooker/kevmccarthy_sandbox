@@ -25,7 +25,10 @@ view: returned_items_by_returned_date {
     explore_source: studio_connector_basic_order_items {
       column: returned_date {field:order_items.returned_at_date}
       column: returned_count {field:order_items.count}
-      bind_filters: {from_field:combined_explore_parameters.date_filter to_field:order_items.returned_at_date}
+      bind_filters: {
+        # from_field:combined_explore_parameters.date_filter to_field:order_items.returned_at_date
+        from_field:combined_explore_parameters.date_filter to_field:order_items.returned_at_date
+        }
     }
   }
   dimension: returned_date {type:date}
@@ -37,7 +40,7 @@ view: shipped_items_by_shipped_date {
     explore_source: studio_connector_basic_order_items {
       column: shipped_date {field:order_items.shipped_at_date}
       column: shipped_count {field:order_items.count}
-      bind_filters: {from_field:combined_explore_parameters.date_filter to_field:order_items.shipped_at_date}
+      bind_filters: {from_field:shipped_and_returned_items.shipped_date to_field:order_items.shipped_at_date}
     }
   }
   # dimension: shipped_date {type:date}

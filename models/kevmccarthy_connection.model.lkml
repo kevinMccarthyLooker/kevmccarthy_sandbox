@@ -383,3 +383,22 @@ include: "/tile_sizes.dashboard.lookml"
 
 
 # include: "/mess_with_a_basic_ndt_manually__does_it_still_work"
+
+
+include: "/information_schema_job_stages.view"
+
+include: "/array_of_structs_field.view.lkml"
+
+
+
+
+
+
+
+
+
+
+
+include: "/parition_and_filter_ui_on_numeric.lkml"
+
+include: "/actions.lkml"

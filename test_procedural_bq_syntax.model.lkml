@@ -159,3 +159,80 @@ CREATE OR REPLACE TABLE `thekitchentable.kevmccarthy_sandbox_dataset.procedural_
 
     # --;;#commented out end of sql
     # }#;; ;;
+
+
+view: test_procedural_bq_syntax_v2 {
+  # derived_table: {
+  #   sql:
+  #   select 'data' as regular_data, stringVar as passed_variable
+  #   ;;
+  # }
+  dimension: regular_data {}
+
+  parameter: test_entry {
+    type: string
+    default_value: "unset"
+  }
+  dimension: passed_variable {}
+}
+##8/25/25
+explore: test_procedural_bq_syntax_v2 {
+  sql_preamble:
+    DECLARE stringVar STRING;
+    SET stringVar = 't'; -- or parameter choices
+
+create temp table test_procedural_bq_syntax_v2 AS (
+select 'data' as regular_data, stringVar as passed_variable
+union all
+select 'data' as regular_data, stringVar as passed_variable
+union all
+select 'data2' as regular_data, stringVar as passed_variable
+);
+
+    create temp table result_set1 as
+
+  ;;#;; special comment resets text colors in IDE ;;
+  # /*
+
+  sql_always_having:
+  1=1
+  )
+
+) ww
+) bb WHERE z__pivot_col_rank <= 16384
+) aa
+) xx
+) zz
+ WHERE (z__pivot_col_rank <= 12 OR z__is_highest_ranked_cell = 1) AND (z___pivot_row_rank <= 500 OR z__pivot_col_ordering = 1) ORDER BY z___pivot_row_rank
+  ;
+
+-- SELECT * FROM  thekitchentable.kevmccarthy_sandbox_dataset.result_set1
+Select * FROM
+(select * from
+(select * from
+(select * from
+(select * from
+(select * from
+(select * from result_set1
+
+
+
+  ;;
+
+}
+
+
+### This showed that dashboard url doesn't give filter values or other info
+view:dashurl_liquid {
+  derived_table: {
+    sql: select '1' as id ;;
+  }
+  dimension: dashurl_liquid {
+    sql: 'test_procedural_bq_syntax_v2.regular_data._is_selected:{{_explore._dashboard_url}}'
+    --{{_explore._dashboard_url}}
+    ;;
+  }
+}
+explore: dashurl_liquid {
+hidden: yes
+}

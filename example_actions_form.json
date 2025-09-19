@@ -1,0 +1,28 @@
+[
+  {
+    "name": "title",
+    "type": "select",
+    "label": "desired label name",
+    "description": "description text",
+    "required": true,
+    "default": "value string",
+    "options": [
+      {
+        "name": "name string"
+        "label": "desired label name"
+      },
+      {
+        "name": "name string"
+        "label": "desired label name"
+      }
+    ]
+  },
+  {
+    "name": "title",
+    "type": "textarea",
+    "label": "desired label name",
+    "description": "description text",
+    "required": true,
+    "default": "value string",
+  }
+]

@@ -52,6 +52,12 @@ explore: gmack_vz_liquid_filtration_question {
 }
 
 
+
+
+
+
+
+
 include: "/eLyons_label_html_question.lkml"
 
 
@@ -276,10 +282,7 @@ include: "/contribution_analysis_idea/modelling_generic_results.lkml"
 #     ${EXTENDED} ;;
 #   }
 #   }
-# explore: test_capture_filters_base {
-#   # extends: [capture_filter_settings__template_explore_for_extension]
-#   join: capture_filter_settings__for_test_capture_explore {relationship: many_to_one type: cross}
-# }
+
 include: "/events_explore_with_capture_filters.lkml"
 explore: +events {
   join: capture_filter_settings__events {
@@ -539,6 +542,7 @@ view: order_items_field_list {
 {% if users.location_latitude_max._is_selected %} users.location_latitude_max{% else %} -- users.location_latitude_max is not selected {% endif %}
 {% if users.location_longitude_min._is_selected %} users.location_longitude_min{% else %} -- users.location_longitude_min is not selected {% endif %}
 {% if users.location_longitude_max._is_selected %} users.location_longitude_max{% else %} -- users.location_longitude_max is not selected {% endif %}
+{% if users.location_longitude_max._is_selected %} users.location_longitude_max{% else %} -- users.location_longitude_max is not selected {% endif %}
     ;;
   }
 
@@ -789,4 +793,268 @@ explore: sym_agg_example {
 explore: orders_example {
   from: orders
   view_name: orders
-  }
+}
+
+
+include: "/capture_current_query_filters.lkml"
+# explore: test_capture_filters_base {
+
+#   # view_name: order_items
+#   extends: [capture_filter_settings__template_explore_for_extension]
+#   # join: capture_filter_settings__for_test_capture_explore {relationship: many_to_one type: cross}
+#   join: order_items {
+#     sql:
+#     full outer join order_items on false
+#     ;; relationship:one_to_one
+#   }
+#   join: users {
+#     sql_on:${users.id}=${order_items.user_id};;
+#     relationship: many_to_one
+#   }
+#   join: capture_is_selected_settings__template {relationship:one_to_one sql:;;}
+
+# # sql_always_having:
+# # 1=1
+# # )
+
+# # )
+
+# # select * from (
+# # select * from another_view
+# # union all
+# # select * from another_view
+
+# #   ;;
+
+# sql_always_having:
+# 1=1
+# )
+# )
+# ,forecast as (
+# SELECT
+#   -- * --(status,forecast_timestamp,forecast_value,confidence_level,prediction_interval_lower_bound,prediction_interval_upper_bound, ai_forecast_status)
+#   date(forecast_timestamp) as order_items_created_at_date,
+#   forecast_value as order_items_total_sale_price
+#   --order_items_status,
+#   --'forecast' as forecast
+#     {% assign selected_fields = capture_is_selected_settings__template.all_fields_is_selected._sql | split:','%}
+#     {% for field in selected_fields %}
+#       {% assign renamed_field = field | replace: '.','_' %}
+#       --field:{{renamed_field}}
+#       {% if renamed_field == 'order_items_created_at_date' %}--order_items_created_at_date
+#       {% elsif renamed_field == 'order_items_total_sale_price' %}--order_items_total_sale_price
+#       {% elsif renamed_field == 'test_capture_filters_base_forecast' %}--test_capture_filters_base_forecast
+#       {% else %},{{renamed_field}}
+#       {% endif %}
+#     {% endfor %}
+
+# FROM
+#   AI.FORECAST(
+#     -- TABLE `kevmccarthy.thelook_with_orders_km.forecast_input_dataset`,
+#     -- TABLE dataset,
+#     --{{capture_is_selected_settings__template.all_fields_is_selected._sql}}
+
+
+#     TABLE another_view,
+#     timestamp_col => 'order_items_created_at_date',-- timestamp_col => 'created_month',
+#     data_col => 'order_items_total_sale_price', -- data_col => 'total_sales',
+#     model => 'TimesFM 2.0',
+
+# /*
+#     id_cols => [
+#     'order_items_status'
+#     -- -- ,'department'
+
+#     ],
+#     */
+#     id_cols => [
+#     {% assign selected_fields = capture_is_selected_settings__template.all_fields_is_selected._sql | split:','%}
+#     {% for field in selected_fields %}
+#       {% assign renamed_field = field | replace: '.','_' %}
+#       --field:{{renamed_field}}
+#       {% if renamed_field == 'order_items_created_at_date' %}--order_items_created_at_date
+#       {% elsif renamed_field == 'order_items_total_sale_price' %}--order_items_total_sale_price
+#       {% elsif renamed_field == 'test_capture_filters_base_forecast' %}--test_capture_filters_base_forecast
+#       {% else %}'{{renamed_field}}'
+#       {% endif %}
+#     {% endfor %}
+#     ],
+#     horizon => 50,
+#     confidence_level => .75
+#   )
+# )
+
+# select * from (
+#   select * from another_view
+#   union all
+#   select another_view.* replace(
+#   forecast.order_items_created_at_date as order_items_created_at_date,
+#   forecast.order_items_total_sale_price as order_items_total_sale_price,
+#   'forecast' as test_capture_filters_base_forecast
+
+#   --forecast.order_items_status as order_items_status,
+# {% assign selected_fields = capture_is_selected_settings__template.all_fields_is_selected._sql | split:','%}
+#     {% for field in selected_fields %}
+#       {% assign renamed_field = field | replace: '.','_' %}
+#       --field:{{renamed_field}}
+#       {% if renamed_field == 'order_items_created_at_date' %}--order_items_created_at_date
+#       {% elsif renamed_field == 'order_items_total_sale_price' %}--order_items_total_sale_price
+#       {% elsif renamed_field == 'test_capture_filters_base_forecast' %}--test_capture_filters_base_forecast
+#       {% else %},forecast.{{renamed_field}} as {{renamed_field}}
+#       {% endif %}
+#     {% endfor %}
+#   ) from (select * from another_view where 1=0) as another_view
+#       full outer join
+#       (
+#       select *
+#       -- date(forecast_timestamp),status,forecast_value
+#       from forecast
+#       ) as forecast on false
+
+# ;;
+#   always_join: [another_view]
+#   join: another_view {
+#     # sql: another_view_s_join ;;
+#     sql: ;;
+#     relationship: one_to_one
+#   }
+# }
+# view: another_view {
+#   derived_table: {
+
+#     sql:
+#     /*TABLES INCLUDED*/
+#     /*${order_items.SQL_TABLE_NAME}*/
+
+#       --;;
+# #;;
+#     }
+# }
+
+# view: test_capture_filters_base {
+#   derived_table: {
+
+# # sql:
+# # /*TABLES INCLUDED*/
+# # /*${order_items.SQL_TABLE_NAME}*/
+
+# # --;;
+# # #;;
+#     sql:
+# /*TABLES INCLUDED*/
+# /*${order_items.SQL_TABLE_NAME}*/
+
+# select (null);;
+
+#   }
+#   dimension:forecast {
+#     sql: 'regular' ;;
+#   }
+#   measure: forecast_sale_price {
+#     type: sum
+#     sql: order_items_total_sale_price ;;
+#     filters: [forecast: "forecast"]
+#   }
+# }
+
+
+
+# #this version creates ability to build upon end user quer
+# #all within the selct clause itself
+# #(so it works even when there's pivot
+# #note: relies on adding a helper dimension
+# # # needs to be alphabetically first in base view so it comes first
+# # # and also hacks the having clause
+# view: test_capture_filters_test2 {
+#   sql_table_name: (select '1' as id,'regular' as regular, 'zz' as zz) ;;
+#   dimension: aa {
+# sql:
+# --inject a wrapper around main query.  this will be preceeded with initial 'select...'
+# *
+# --example manipulation of result set
+# {% if regular._in_query %}
+#   REPLACE('test' as test_capture_filters_test2_regular)
+# {% endif %}
+# from (with result_set as
+# (
+# select
+# 'placeholder'
+# ;;
+#   }
+#   measure: aa_required_measure {
+#     type: string
+#     # sql: 't223234' ;;
+# sql:
+# {% if aa._is_selected %}
+# 't'
+# {% else %}
+#             --inject a wrapper around main query.  this will be preceeded with initial 'select...'
+# *
+# -- REPLACE('test' as test_capture_filters_test2_regular)
+# from (with result_set as
+# (
+# select
+# 't'
+# {%endif%}
+# ;;
+#   }
+#   dimension: required_filter {
+#     required_fields: [aa,aa_required_measure]
+#   }
+#   dimension: regular {}
+#   dimension: zz {}
+#   measure: count {type:count
+#     # required_fields: [aa]
+#   }
+#   measure: forecast_count {
+#     type:count
+#     required_fields: [aa]
+#   }
+
+#   measure: test_for_having {
+#     required_fields: [aa,aa_required_measure]
+#     type: string
+#     sql: true ;;
+# #     sql:
+# # {% if forecast_count._in_query %}
+# # 1=1))--end having clause
+# # )--end of injection of wrapper around main query CTE called we named result_set
+# #   select *,result_set from result_set
+# # {% else %}true
+# # {% endif %}
+# #   ;;
+#   }
+#   measure: special_having {
+#     # type: number
+#     # sql: 1 ;;
+#     type: string
+#     sql: 'KEEP FOR HAVING CLAUSE' ;;
+#   }
+# }
+
+# explore: test_capture_filters_test2 {
+
+#   always_filter: {filters:[special_having: "KEEP FOR HAVING CLAUSE"]}
+#   # always_filter: {filters:[test_capture_filters_test2.count: "1"]}
+
+# sql_always_having:
+# 1=1)--end having clause
+# {% if test_capture_filters_test2.special_having._is_filtered %}
+# )/*end original main query */ select *,result_set from result_set
+# /*looker will inject ')' for planned end of having clause and then ')' for end of Looker's main query wrapper for having clause*/
+# {% else %}
+# /*end original main query */ select *,result_set from result_set)
+# /*This case represents no user measure filters selected... looker will NOT inject ')' for planned end of having clause as above, but will still inject ')' for end of Looker's main query wrapper for having clause*/
+# {% endif %}
+
+# ;;
+#   # sql_always_having:
+#   # ${test_capture_filters_test2.test_for_having}/*always having*/
+#   # ;;
+#   # sql_always_having:  true;;
+# }
+
+
+include: "/period_over_period_built_in_measures.lkml"
+
+include: "/**/*explore_include_me*"

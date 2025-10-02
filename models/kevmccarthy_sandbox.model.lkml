@@ -1058,3 +1058,75 @@ include: "/capture_current_query_filters.lkml"
 include: "/period_over_period_built_in_measures.lkml"
 
 include: "/**/*explore_include_me*"
+
+include: "/standard_banner.dashboard.lookml"
+include: "/test_dashboard_that_uses_standard_banner.dashboard.lookml"
+
+
+
+
+view: +order_items {
+  dimension: category {label:"test label change"}
+  dimension: cost {label:"My Key"}
+}
+
+
+
+
+view: +orders {
+  measure: num_of_item_sum {
+    type: sum
+    sql: ${num_of_item} ;;
+  }
+}
+
+
+
+explore: +order_items {
+  aggregate_table: rollup__orders_status {
+    query: {
+      dimensions: [orders.status]
+      measures: [orders.count, orders.sum_example]
+    }
+    materialization: {persist_for:"24 hours"}
+}
+  }
+
+# view: oe2 {
+#   # derived_table: {
+#   #   explore_source: order_items {
+#   #     column: status {field:orders.status}
+#   #     column: count {field:orders.count}
+#   #   }
+#   # }
+#   derived_table: {
+#     sql: select * from ${rollup__orders_status.SQL_TABLE_NAME} ;;
+#   }
+#   dimension: status {}
+#   measure: count {type:sum sql:${TABLE}.count;;}
+# }
+
+# explore: oe2 {}
+
+
+view: order_items_for_pop_hack {
+  extends: [order_items]
+  measure: pop_hack {
+    based_on: total_sale_price
+    based_on_time: created_at_date
+    period: year
+    type: period_over_period
+  }
+  measure: result_row_number {
+    type: string
+    sql: any_value('1');;
+    # expression:row();;
+    # html: ;;
+  }
+}
+
+explore: order_items_for_pop_hack {
+  sql_always_having:  1=1
+  /*${pop_hack}=1*/
+  ;;
+}

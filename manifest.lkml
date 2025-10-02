@@ -117,3 +117,12 @@ constant: blended_field_sql_lookup__alternate_string_label_for_nulls {
 constant: blend_special_source_table_basic_column_reference {
   value: "{% if  view__is_in_query._sql=='true' %}{{_field._name}}{%else%}null/*sql replaced with null because the view {{_view._name}} is not required by the query (e.g. no metrics)*/{%endif%}"
 }
+
+
+
+
+
+# localization_settings: {
+#   default_locale: en
+#   localization_level: permissive
+# }

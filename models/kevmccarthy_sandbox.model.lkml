@@ -1109,24 +1109,52 @@ explore: +order_items {
 # explore: oe2 {}
 
 
-view: order_items_for_pop_hack {
+# view: order_items_for_pop_hack {
+#   extends: [order_items]
+#   measure: pop_hack {
+#     based_on: total_sale_price
+#     based_on_time: created_at_date
+#     period: year
+#     type: period_over_period
+#   }
+#   measure: result_row_number {
+#     type: string
+#     sql: any_value('1');;
+#     # expression:row();;
+#     # html: ;;
+#   }
+# }
+
+# explore: order_items_for_pop_hack {
+#   sql_always_having:  1=1
+#   /*${pop_hack}=1*/
+#   ;;#too messy
+# }
+
+
+
+# sql_preamble:create temp function nl(input ANY TYPE) AS ((select any_value(if(false,input,null)) from(select input)));;;
+view: order_items_for_limited_drill_test {
   extends: [order_items]
-  measure: pop_hack {
-    based_on: total_sale_price
-    based_on_time: created_at_date
-    period: year
-    type: period_over_period
+
+  dimension: status {
+    sql: nl(${EXTENDED}) ;;
   }
   measure: result_row_number {
     type: string
     sql: any_value('1');;
-    # expression:row();;
-    # html: ;;
+    drill_fields: [status,result_row_number]
+    link: {
+      label:"drill"
+      # url: "{{ _field._link | replace: 'kevmccarthy_sandbox/order_items_for_temp_function_test','km_test_limited_access/order_items' }}"
+      # url: "{{ link }}"
+      url: "{{ link | replace: 'kevmccarthy_sandbox/order_items_for_limited_drill_test','km_test_limited_access/order_items_for_limited_drill_test' }}"
+    }
   }
 }
 
-explore: order_items_for_pop_hack {
-  sql_always_having:  1=1
-  /*${pop_hack}=1*/
-  ;;
+explore: order_items_for_limited_drill_test {
+  from: order_items_for_limited_drill_test
+  view_name: order_items
+  # sql_preamble:create temp function nl(input ANY TYPE) AS ((select any_value(if(false,input,null)) from(select input)));;;
 }

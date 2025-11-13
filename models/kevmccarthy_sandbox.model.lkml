@@ -7,10 +7,15 @@ include: "//thelook_ecommerce_autogen_files/basic_model_params"
 include: "//thelook_ecommerce_autogen_files/basic_explores/order_items.explore.lkml"
 
 view: +products {
+  derived_table: {sql:${EXTENDED} ;;}
   dimension: brand {
-    label:"tbrandlableadjusted"
-    hidden: yes
+    # label:"tbrandlableadjusted"
+    # hidden: yes
   }
+  dimension: category_and_brand {
+    sql: concat(${category},' -> ',${brand})  ;;
+  }
+
 }
 # explore: +order_items {label:"tlabel adjust"}
 
@@ -1083,6 +1088,7 @@ view: +orders {
 
 
 explore: +order_items {
+  join: products {relationship:many_to_one sql_on:${order_items.product_id}=${products.id};;}
   aggregate_table: rollup__orders_status {
     query: {
       dimensions: [orders.status]
@@ -1119,8 +1125,8 @@ explore: +order_items {
 #   }
 #   measure: result_row_number {
 #     type: string
-#     sql: any_value('1');;
-#     # expression:row();;
+#     # sql: any_value('1');;
+#     expression:${t};;
 #     # html: ;;
 #   }
 # }
@@ -1131,7 +1137,13 @@ explore: +order_items {
 #   ;;#too messy
 # }
 
-
+view: expressions_test {
+  extends: [order_items]
+  dimension: exp_ref_something_dynamic_field {
+    expression: "${test}";;
+  }
+}
+explore: expressions_test {}
 
 # sql_preamble:create temp function nl(input ANY TYPE) AS ((select any_value(if(false,input,null)) from(select input)));;;
 view: order_items_for_limited_drill_test {
@@ -1157,4 +1169,59 @@ explore: order_items_for_limited_drill_test {
   from: order_items_for_limited_drill_test
   view_name: order_items
   # sql_preamble:create temp function nl(input ANY TYPE) AS ((select any_value(if(false,input,null)) from(select input)));;;
+}
+
+
+# view: +order_items {
+#   parameter: unquoted_param {
+#     type: unquoted
+#     allowed_value: {value:"Europe"}
+#     allowed_value: {value:"another"}
+#   }
+#   dimension: region_is_selected_region {
+#     type: yesno
+#     sql: ${users.region}= '{% parameter unquoted_param %}';;
+#   }
+#   measure: sale_price_for_selected_region {
+#     type: sum
+#     sql: ${sale_price} ;;
+#     filters: [region_is_selected_region: "Yes"]
+
+#   }
+
+# }
+# view: +users {
+#   dimension: region {
+#     sql: if(${country} in ('France','Spain'),'Europe','another') ;;
+#     link: {
+#       url: "https://looker.thekitchentable.gccbianortham.joonix.net/explore/kevmccarthy_sandbox/order_items?fields=order_items.total_sale_price&&f[order_items.unquoted_param]={{filterable_value}}"
+#       label: "test-{{filterable_value}}-"
+#     }
+#   }
+
+# }
+view: alpha_sort_check {
+  dimension: a {view_label:"🔴"}
+  dimension: b {}
+  dimension: c {view_label:"]"}
+
+}
+
+explore: alpha_sort_check {}
+
+
+view: order_items_with_percent_max {
+  extends: [order_items]
+  measure: percent_max_over {
+    type: number
+    sql: safe_divide(${order_items.count},max(${order_items.count}) over({% if products.category._is_selected %}partition by category{% endif %})) ;;
+    # value_format_name: percent_1
+    html: {{order_items.count._rendered_value}} ;;
+
+  }
+}
+explore: order_items_with_percent_max {
+  extends: [order_items]
+  from:order_items_with_percent_max
+  view_name:order_items
 }

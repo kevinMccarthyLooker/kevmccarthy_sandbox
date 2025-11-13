@@ -126,3 +126,19 @@ constant: blend_special_source_table_basic_column_reference {
 #   default_locale: en
 #   localization_level: permissive
 # }
+
+
+constant: include_everything_from_parent{
+
+  value: "./**/*" #everthing in grandparent (includes_wildcards)
+}
+
+constant: test_lookml_dash_constant {value:"{yAxis: [{type: 'datetime',opposite: true}]}"}
+
+constant: nl {
+  value: "{{-
+-}}"
+
+
+
+}

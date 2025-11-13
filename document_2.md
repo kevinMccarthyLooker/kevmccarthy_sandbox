@@ -1,0 +1,11 @@
+---
+navigation: true
+---
+
+# Document 2
+
+Put your documentation here! Your text is rendered with [GitHub Flavored Markdown](https://help.github.com/articles/github-flavored-markdown).
+
+Click the "Edit Source" button above to make changes.
+
+[Contribution guidelines for this project](docs/CONTRIBUTING.md)

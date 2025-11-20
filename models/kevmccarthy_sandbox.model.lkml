@@ -1225,3 +1225,59 @@ explore: order_items_with_percent_max {
   from:order_items_with_percent_max
   view_name:order_items
 }
+
+
+#for data history playback testing
+view: +orders {
+  measure: count_over_30 {
+    type: number
+    sql: iff(${count}>30,${count},null) ;;
+  }
+
+  measure: min_date {
+    type: date
+    sql: min(${created_at_date}) ;;
+  }
+  measure: max_date {
+    type: date
+    sql: max(${created_at_date}) ;;
+  }
+
+  measure: any_value_user_id {
+    sql: any_value(${user_id}) ;;
+  }
+  dimension: date_proxy {
+    label:"User ID2"
+    type: date
+    sql: current_date()-${user_id} ;;
+    html: {{any_value_user_id._rendered_value}} ;;
+  }
+
+  dimension: max_date_filter_field {
+    datatype: date
+    type: date
+    sql:cast({% date_start max_date_filter_field %}as date);;
+  }
+
+  dimension: date_from_filter_filter_catcher {
+    sql:{% condition date_from_filter_itself %}{% endcondition %};;
+  }
+  dimension: date_from_filter_itself {
+    datatype: date
+    type: date
+    # sql:cast({% date_start date_from_filter_itself %}as date);;
+    sql:{{date_from_filter_filter_catcher._sql | replace: '=',''}};;
+  }
+  dimension: created_date_less_than_filter_date_from_filter_itself {
+    type: yesno
+    sql: ${created_at_date}<=${date_from_filter_itself} ;;
+  }
+}
+
+explore: +order_items {
+#   sql_always_where:
+# --{% date_start orders.max_date_filter_field %}
+
+#   cast(${order_items.created_at_date} as date)<=cast({% date_end orders.max_date_filter_field %}  as date)
+#   ;;
+}

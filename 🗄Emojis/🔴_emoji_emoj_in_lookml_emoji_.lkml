@@ -1,7 +1,6 @@
 # include: "/blank.lkml
 view: a {
 label: "
-STRANGELEY YOU CAN HAVE TEXT AFTER INCLUDES APPARENTLY WITHOUT ERROR...
 THIS ALLOWS FOR TEST WITH # HASH TAGS, BUT MAYBE MORE CONFUSING THAN IT's WORTH
 
 Characters/Avatars:🗿🫠🐸🐤🦋🦄🦀🐠🗿
@@ -25,7 +24,7 @@ Special Letters #####################################
 🥇🥈🥉
 #####################################################
 Special Bullets / Drawings of arrayed things ########
-𐄙𐄚𐄛𐄜𐄝𐄞𐄟𐄠𐄡𝌆𝌓𝌠𝌓𝌆〇
+𐄙𐄚𐄛𐄜𐄝𐄞𐄟𐄠𐄡𝌆𝌓𝌠𝌓𝌆〇◑◖
 𐄐𐄑𐄒𐄓𐄔𐄕𐄖𐄗𐄘𝌆𝌮𝍖𝌮𝌆
 𐄇𐄈𐄉𐄊𐄋𐄌𐄍𐄎𐄏𝌆𝌭𝍔𝌭𝌆
 𐄢𐄣𐄤𐄥𐄦𐄧𐄨𐄩𐄪

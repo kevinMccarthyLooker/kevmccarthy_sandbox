@@ -1253,26 +1253,28 @@ view: +orders {
     html: {{any_value_user_id._rendered_value}} ;;
   }
 
-  dimension: max_date_filter_field {
-    datatype: date
-    type: date
-    sql:cast({% date_start max_date_filter_field %}as date);;
-  }
+  # dimension: max_date_filter_field {
+  #   datatype: date
+  #   type: date
+  #   sql:cast({% date_start max_date_filter_field %}as date);;
+  # }
 
-  dimension: date_from_filter_filter_catcher {
-    sql:{% condition date_from_filter_itself %}{% endcondition %};;
-  }
-  dimension: date_from_filter_itself {
-    datatype: date
-    type: date
-    # sql:cast({% date_start date_from_filter_itself %}as date);;
-    sql:{{date_from_filter_filter_catcher._sql | replace: '=',''}};;
-  }
-  dimension: created_date_less_than_filter_date_from_filter_itself {
-    type: yesno
-    sql: ${created_at_date}<=${date_from_filter_itself} ;;
-  }
+  # dimension: date_from_filter_filter_catcher {
+  #   sql:{% condition date_from_filter_itself %}{% endcondition %};;
+  # }
+  # dimension: date_from_filter_itself {
+  #   datatype: date
+  #   type: date
+  #   # sql:cast({% date_start date_from_filter_itself %}as date);;
+  #   sql:{{ date_from_filter_filter_catcher._sql | replace: '=','' | replace: 'DATE(','' | replace: ')','' }};;
+  # }
+  # dimension: created_date_less_than_filter_date_from_filter_itself {
+  #   type: yesno
+  #   sql: ${created_at_date}<=${date_from_filter_itself} ;;
+  # }
 }
+
+
 
 explore: +order_items {
 #   sql_always_where:
@@ -1281,3 +1283,17 @@ explore: +order_items {
 #   cast(${order_items.created_at_date} as date)<=cast({% date_end orders.max_date_filter_field %}  as date)
 #   ;;
 }
+
+# view: +order_items{
+#   parameter: param {
+#     type: unquoted
+#     allowed_value: {value:"testvalue" }
+#     allowed_value: {value:"testvalue2"}
+#   }
+#   measure: count {
+#     label: "t {% param._parameter_value %}"
+
+#   }
+# }
+
+include: "/print_width_lookml_dash.dashboard.lookml"

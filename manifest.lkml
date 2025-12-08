@@ -68,6 +68,10 @@ constant: newline {
   value: "
     "
 }
+constant: nl {
+  value: "{{-
+  -}}"
+}
 
 #a specific set of view names are harcoded into this. not sure how to make it more dynamic
 constant: blended_field_sql_lookup {
@@ -135,10 +139,6 @@ constant: include_everything_from_parent{
 
 constant: test_lookml_dash_constant {value:"{yAxis: [{type: 'datetime',opposite: true}]}"}
 
-constant: nl {
-  value: "{{-
--}}"
 
 
-
-}
+# constant: array_of_views {}
